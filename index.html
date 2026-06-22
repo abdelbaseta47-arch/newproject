@@ -1,1 +1,461 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinSight - منصة التحليل المالي المتقدمة</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* إعدادات المتغيرات والألوان - الطابع المالي الفاخر */
+        :root {
+            --bg-main: #020c1b;
+            --bg-card: #0a192f;
+            --bg-light: #112240;
+            --text-title: #64ffda;
+            --text-body: #8892b0;
+            --text-white: #e6f1ff;
+            --accent-gold: #ffd700;
+            --font-main: 'Tajawal', sans-serif;
+            --font-title: 'Cairo', sans-serif;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-white);
+            font-family: var(--font-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* الهيدر - شريط التنقل */
+        header {
+            background-color: rgba(10, 25, 47, 0.85);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 1px solid var(--bg-light);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: var(--font-title);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-title);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            color: var(--accent-gold);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-white);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text-title);
+        }
+
+        .btn-header {
+            background-color: transparent;
+            border: 1px solid var(--text-title);
+            color: var(--text-title);
+            padding: 8px 18px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-header:hover {
+            background-color: rgba(100, 255, 218, 0.1);
+        }
+
+        /* منطقة البطل - Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding-top: 80px;
+            position: relative;
+        }
+
+        /* توهج خلفي تجميلي */
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(100, 255, 218, 0.08) 0%, transparent 70%);
+            z-index: 0;
+        }
+
+        .hero-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-content h1 {
+            font-family: var(--font-title);
+            font-size: 48px;
+            color: var(--text-white);
+            margin-bottom: 20px;
+            line-height: 1.3;
+        }
+
+        .hero-content h1 span {
+            color: var(--text-title);
+        }
+
+        .hero-content p {
+            color: var(--text-body);
+            font-size: 18px;
+            margin-bottom: 35px;
+            text-align: justify;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+        }
+
+        .btn-primary {
+            background-color: var(--text-title);
+            color: var(--bg-main);
+            padding: 14px 28px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: 0 4px 14px rgba(100, 255, 218, 0.3);
+        }
+
+        .btn-primary:hover {
+            background-color: #52e0bd;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            padding: 14px 28px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 215, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .hero-visual {
+            display: flex;
+            justify-content: center;
+        }
+
+        .dashboard-mockup {
+            background-color: var(--bg-card);
+            border: 1px solid var(--bg-light);
+            border-radius: 8px;
+            width: 100%;
+            height: 350px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .mock-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--bg-light);
+            padding-bottom: 15px;
+        }
+
+        .mock-dots {
+            display: flex;
+            gap: 8px;
+        }
+
+        .mock-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--bg-light);
+        }
+        .mock-dot:nth-child(1) { background-color: #ff5f56; }
+        .mock-dot:nth-child(2) { background-color: #ffbd2e; }
+        .mock-dot:nth-child(3) { background-color: #27c93f; }
+
+        .mock-body {
+            flex-grow: 1;
+            display: flex;
+            gap: 20px;
+            align-items: flex-end;
+            padding-top: 30px;
+        }
+
+        .mock-bar {
+            flex: 1;
+            background: linear-gradient(to top, var(--text-title), #00bfa5);
+            border-radius: 4px 4px 0 0;
+            animation: grow 1.5s ease-out forwards;
+            height: 0;
+        }
+
+        @keyframes grow {
+            to { height: var(--h); }
+        }
+
+        /* قسم المميزات - Features Section */
+        .features {
+            padding: 100px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-family: var(--font-title);
+            font-size: 36px;
+            margin-bottom: 60px;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 3px;
+            background-color: var(--accent-gold);
+            margin: 15px auto 0;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--bg-light);
+            padding: 40px 30px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-bottom-color: var(--text-title);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .feature-icon {
+            font-size: 35px;
+            color: var(--accent-gold);
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-family: var(--font-title);
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: var(--text-white);
+        }
+
+        .feature-card p {
+            color: var(--text-body);
+            font-size: 15px;
+            text-align: justify;
+        }
+
+        /* التذييل - Footer */
+        footer {
+            background-color: #041124;
+            border-top: 1px solid var(--bg-light);
+            padding: 40px 20px;
+            margin-top: 60px;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer-info p {
+            color: var(--text-body);
+            font-size: 14px;
+        }
+
+        .developer-credit {
+            font-weight: 500;
+            color: var(--text-title) !important;
+        }
+
+        .footer-socials {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+        }
+
+        .footer-socials a {
+            color: var(--text-body);
+            font-size: 20px;
+            transition: color 0.3s;
+        }
+
+        .footer-socials a:hover {
+            color: var(--accent-gold);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <i class="fa-solid fa-chart-line"></i>
+                FinSight
+            </a>
+            <ul class="nav-links">
+                <li><a href="#" class="active">الرئيسية</a></li>
+                <li><a href="#">رفع الميزان</a></li>
+                <li><a href="#">القوائم المالية</a></li>
+                <li><a href="#">التحليلات والمقارنات</a></li>
+                <li><a href="#">المساعد الذكي</a></li>
+            </ul>
+            <a href="#" class="btn-header">دخول المحللين</a>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1>منصتك الذكية للتحليل المالي المتقدم وفق <span>معايير IFRS</span></h1>
+                <p>حول موازين المراجعة الخام إلى تقارير ديناميكية واستشارات مالية فورية. تدعم المنصة الفلاتر الذكية، نظام المقارنات الفترية الشهرية والربع سنوية، مع ميزة التخزين الداخلي المستمر ومستشار مالي مدعوم بالذكاء الاصطناعي لتوفير رؤية متكاملة لعين الإدارة.</p>
+                <div class="cta-buttons">
+                    <a href="#" class="btn-primary">ابدأ التحليل الآن <i class="fa-solid fa-arrow-left" style="margin-right: 8px;"></i></a>
+                    <a href="#" class="btn-secondary">تحميل قالب Excel</a>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="dashboard-mockup">
+                    <div class="mock-header">
+                        <div class="mock-dots">
+                            <div class="mock-dot"></div>
+                            <div class="mock-dot"></div>
+                            <div class="mock-dot"></div>
+                        </div>
+                        <span style="font-size: 12px; color: var(--text-body);">FinSight Matrix</span>
+                    </div>
+                    <div class="mock-body">
+                        <div class="mock-bar" style="--h: 40%;"></div>
+                        <div class="mock-bar" style="--h: 65%;"></div>
+                        <div class="mock-bar" style="--h: 50%;"></div>
+                        <div class="mock-bar" style="--h: 85%;"></div>
+                        <div class="mock-bar" style="--h: 70%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <h2 class="section-title">قدرات المنصة الذكية</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-layer-group"></i></div>
+                <h3>هيكلة معايير IFRS</h3>
+                <p>ربط تلقائي وفوري للحسابات والأكواد المسجلة بملف الإكسيل وتوجيهها بدقة إلى مكانها الصحيح بالقوائم المالية الدولية الفردية والمجمعة.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-database"></i></div>
+                <h3>تخزين داخلي مستمر</h3>
+                <p>بياناتك مرفوعة ومحفوظة بأمان داخل بيئة عملك بفضل ميزة الحفظ المستمر، مع توفير تحكم كامل لمسح وتصفير المنصة بضغطة زر واحدة.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-sliders"></i></div>
+                <h3>مقارنات فترية (MoM)</h3>
+                <p>لوحة تحكم تفاعلية تتيح للإدارة مقارنة أداء الشهور والرباع المالية المختلفة، واحتساب الانحرافات المطلقة والمئوية بشكل آلي لرصد التوجهات المالية.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon"><i class="fa-solid fa-brain"></i></div>
+                <h3>المستشار الذكي</h3>
+                <p>محرك ذكاء اصطناعي يقرأ البيانات، يحلل مؤشرات رأس المال العامل، ويصيغ تقارير مكتوبة توضح نقاط القوة والضعف لتوصيات الإدارة العليا.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-container">
+            <div class="footer-info">
+                <p>© 2026 جميع الحقوق محفوظة لمنصة FinSight الماليّة.</p>
+                <p style="margin-top: 5px;">تم التطوير بواسطة: <span class="developer-credit">أحمد عبد الباسط</span></p>
+            </div>
+            <ul class="footer-socials">
+                <li><a href="#"><i class="fa-brands fa-github"></i></a></li>
+                <li><a href="#"><i class="fa-brands fa-linkedin"></i></a></li>
+                <li><a href="#"><i class="fa-solid fa-envelope"></i></a></li>
+            </ul>
+        </div>
+    </footer>
+
+</body>
+</html>

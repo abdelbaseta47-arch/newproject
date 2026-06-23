@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinSight - منصة التحليل المالي</title>
+    <!-- استيراد الخطوط -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- مكتبة الأيقونات -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
@@ -23,7 +25,7 @@
             --font-main: 'Tajawal', sans-serif;
             --font-title: 'Cairo', sans-serif;
             --sidebar-width: 70px;
-            --sidebar-width-expanded: 240px;
+            --sidebar-width-expanded: 260px;
         }
 
         /* متغيرات الوضع الفاتح */
@@ -57,11 +59,11 @@
         .sidebar {
             position: fixed;
             top: 0;
-            right: 0;
+            inset-inline-start: 0;
             width: var(--sidebar-width);
             height: 100vh;
             background-color: var(--bg-sidebar);
-            border-left: 1px solid var(--border-color);
+            border-inline-end: 1px solid var(--border-color);
             z-index: 1000;
             overflow-x: hidden;
             transition: width 0.3s ease;
@@ -94,7 +96,7 @@
             font-size: 24px;
             font-weight: 700;
             color: var(--text-title);
-            margin-right: 15px;
+            margin-inline-start: 15px;
             opacity: 0;
             transition: opacity 0.3s;
         }
@@ -103,7 +105,6 @@
             opacity: 1;
         }
 
-        /* عناصر القائمة (لا تستخدم a tag لمنع ظهور الرابط) */
         .nav-item {
             display: flex;
             align-items: center;
@@ -112,12 +113,13 @@
             white-space: nowrap;
             color: var(--text-muted);
             transition: all 0.2s;
+            border-inline-end: 4px solid transparent;
         }
 
         .nav-item:hover, .nav-item.active {
             background-color: rgba(100, 255, 218, 0.1);
             color: var(--text-title);
-            border-right: 4px solid var(--text-title);
+            border-inline-end: 4px solid var(--text-title);
         }
 
         body.light-mode .nav-item:hover, body.light-mode .nav-item.active {
@@ -133,7 +135,7 @@
         .nav-text {
             font-size: 16px;
             font-weight: 500;
-            margin-right: 15px;
+            margin-inline-start: 15px;
             opacity: 0;
             transition: opacity 0.3s;
         }
@@ -144,14 +146,14 @@
 
         /* محتوى الصفحة الرئيسي */
         .main-content {
-            margin-right: var(--sidebar-width);
+            margin-inline-start: var(--sidebar-width);
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            transition: margin-right 0.3s ease;
+            transition: margin-inline-start 0.3s ease;
         }
 
-        /* الشريط العلوي (الوضع الليلي واللغة) */
+        /* الشريط العلوي */
         .top-bar {
             height: 60px;
             background-color: var(--bg-surface);
@@ -183,7 +185,7 @@
             border-color: var(--text-title);
         }
 
-        /* منطقة المقدمة (Hero) بدون أزرار أو رسوم */
+        /* منطقة المقدمة */
         .intro-section {
             padding: 80px 40px;
             max-width: 1000px;
@@ -219,16 +221,38 @@
             text-align: center;
             font-size: 14px;
             color: var(--text-muted);
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .developer-name {
             color: var(--accent-gold);
             font-weight: bold;
         }
+
+        .social-link {
+            color: #1877F2; /* لون الفيسبوك */
+            font-size: 20px;
+            margin-inline-start: 10px;
+            text-decoration: none;
+            transition: transform 0.3s;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .social-link:hover {
+            transform: scale(1.1);
+        }
+        
+        body.light-mode .social-link {
+            color: #0866FF;
+        }
     </style>
 </head>
 <body>
 
+    <!-- الشريط الجانبي -->
     <nav class="sidebar" id="sidebar">
         <div class="logo-container">
             <i class="fa-solid fa-chart-pie logo-icon"></i>
@@ -237,91 +261,160 @@
 
         <div class="nav-item active" onclick="navigateTo('home')">
             <i class="fa-solid fa-house nav-icon"></i>
-            <span class="nav-text">الرئيسية</span>
+            <span class="nav-text" data-i18n="navHome">الرئيسية</span>
         </div>
         
         <div class="nav-item" onclick="navigateTo('upload')">
             <i class="fa-solid fa-cloud-arrow-up nav-icon"></i>
-            <span class="nav-text">رفع ميزان المراجعة</span>
+            <span class="nav-text" data-i18n="navUpload">رفع ميزان المراجعة</span>
         </div>
 
         <div class="nav-item" onclick="navigateTo('statements')">
             <i class="fa-solid fa-file-invoice-dollar nav-icon"></i>
-            <span class="nav-text">القوائم المالية</span>
+            <span class="nav-text" data-i18n="navStatements">القوائم المالية</span>
         </div>
 
         <div class="nav-item" onclick="navigateTo('analysis')">
             <i class="fa-solid fa-chart-line nav-icon"></i>
-            <span class="nav-text">التحليلات والمقارنات</span>
+            <span class="nav-text" data-i18n="navAnalysis">التحليلات والمقارنات</span>
         </div>
 
         <div class="nav-item" onclick="navigateTo('ai')">
             <i class="fa-solid fa-robot nav-icon"></i>
-            <span class="nav-text">المساعد الذكي</span>
+            <span class="nav-text" data-i18n="navAi">المساعد الذكي</span>
         </div>
     </nav>
 
+    <!-- المحتوى الرئيسي -->
     <main class="main-content">
+        <!-- الشريط العلوي -->
         <div class="top-bar">
             <button class="action-btn" id="langToggle" onclick="toggleLanguage()">
-                <i class="fa-solid fa-globe"></i> English
+                <i class="fa-solid fa-globe"></i> <span>English</span>
             </button>
             <button class="action-btn" id="themeToggle" onclick="toggleTheme()">
-                <i class="fa-solid fa-sun"></i> الوضع الفاتح
+                <i class="fa-solid fa-sun"></i> <span id="themeText" data-i18n="themeLight">الوضع الفاتح</span>
             </button>
         </div>
 
+        <!-- مقدمة المنصة -->
         <section class="intro-section">
-            <h1 class="intro-title">مرحباً بك في منصة <span>FinSight</span> للتحليل المالي المتقدم</h1>
-            <p class="intro-text">
+            <h1 class="intro-title" data-i18n="introTitle">مرحباً بك في منصة <span>FinSight</span> للتحليل المالي المتقدم</h1>
+            <p class="intro-text" data-i18n="introP1">
                 المنصة مصممة خصيصاً لتوفير بيئة عمل احترافية تدعم اتخاذ القرارات الإدارية. من خلال واجهة متقدمة تعتمد على معايير التقارير المالية الدولية (IFRS)، تتيح لك FinSight تحويل موازين المراجعة الخام إلى لوحات بيانات تفاعلية وقوائم مالية دقيقة.
             </p>
-            <p class="intro-text">
-                تعتمد المنصة على نظام تخزين داخلي آمن يضمن استمرارية بياناتك، مع إمكانيات فائقة لعمل المقارنات الفترية (الشهرية والسنوية)، وصولاً إلى تقديم استشارات وتوصيات مالية مدعومة بمحرك الذكاء الاصطناعي لاستكشاف نقاط القوة والضعف في الأداء المالي للمنشأة.
+            <p class="intro-text" data-i18n="introP2">
+                تبدأ دورة العمل برفع ميزان المراجعة، لتقوم المنصة آلياً بتوجيه الحسابات وإعداد القوائم المالية وفق أحدث المعايير. بعد ذلك، يتم تحويل هذه الأرقام إلى رسوم بيانية ومقارنات فترية دقيقة، مما يضع بين يدي الإدارة ملخصاً بصرياً شاملاً يسهل قراءته وتحليله لتقييم الأداء المالي للمنشأة خطوة بخطوة.
             </p>
         </section>
 
+        <!-- التذييل -->
         <footer>
-            <p>FinSight © 2026 جميع الحقوق محفوظة | تم التطوير بواسطة: <span class="developer-name">أحمد عبد الباسط</span></p>
+            <div data-i18n="footerText">
+                FinSight © 2026 جميع الحقوق محفوظة | تم التطوير بواسطة: <span class='developer-name'>أحمد عبد الباسط</span>
+                <a href="https://www.facebook.com/YOUR_PROFILE_LINK" target="_blank" class="social-link" title="تواصل معي على فيسبوك">
+                    <i class="fa-brands fa-facebook"></i>
+                </a>
+            </div>
         </footer>
     </main>
 
+    <!-- سكربت التحكم والتفاعل (المترجم الذكي والحفظ السحابي) -->
     <script>
-        // دالة التنقل الوهمي (لمنع ظهور الرابط أسفل الشاشة)
         function navigateTo(page) {
-            // سيتم وضع أكواد ربط الصفحات هنا لاحقاً
-            console.log("الانتقال إلى صفحة: " + page);
-            
-            // تحديث العنصر النشط في الشريط الجانبي
             const items = document.querySelectorAll('.nav-item');
             items.forEach(item => item.classList.remove('active'));
             event.currentTarget.classList.add('active');
+            // سيتم هنا لاحقاً كود الانتقال الفعلي للصفحات الأخرى
         }
 
-        // دالة تبديل الوضع (ليلي / فاتح)
+        let isLightMode = localStorage.getItem('finSightTheme') === 'light';
+        let currentLang = localStorage.getItem('finSightLang') || 'ar';
+
+        const translations = {
+            ar: {
+                navHome: "الرئيسية",
+                navUpload: "رفع ميزان المراجعة",
+                navStatements: "القوائم المالية",
+                navAnalysis: "التحليلات والمقارنات",
+                navAi: "المساعد الذكي",
+                themeLight: "الوضع الفاتح",
+                themeDark: "الوضع الداكن",
+                introTitle: "مرحباً بك في منصة <span>FinSight</span> للتحليل المالي المتقدم",
+                introP1: "المنصة مصممة خصيصاً لتوفير بيئة عمل احترافية تدعم اتخاذ القرارات الإدارية. من خلال واجهة متقدمة تعتمد على معايير التقارير المالية الدولية (IFRS)، تتيح لك FinSight تحويل موازين المراجعة الخام إلى لوحات بيانات تفاعلية وقوائم مالية دقيقة.",
+                introP2: "تبدأ دورة العمل برفع ميزان المراجعة، لتقوم المنصة آلياً بتوجيه الحسابات وإعداد القوائم المالية وفق أحدث المعايير. بعد ذلك، يتم تحويل هذه الأرقام إلى رسوم بيانية ومقارنات فترية دقيقة، مما يضع بين يدي الإدارة ملخصاً بصرياً شاملاً يسهل قراءته وتحليله لتقييم الأداء المالي للمنشأة خطوة بخطوة.",
+                footerText: "FinSight © 2026 جميع الحقوق محفوظة | تم التطوير بواسطة: <span class='developer-name'>أحمد عبد الباسط</span> <a href='https://www.facebook.com/YOUR_PROFILE_LINK' target='_blank' class='social-link' title='تواصل معي على فيسبوك'><i class='fa-brands fa-facebook'></i></a>"
+            },
+            en: {
+                navHome: "Home",
+                navUpload: "Upload Trial Balance",
+                navStatements: "Financial Statements",
+                navAnalysis: "Analytics & Comparisons",
+                navAi: "AI Assistant",
+                themeLight: "Light Mode",
+                themeDark: "Dark Mode",
+                introTitle: "Welcome to <span>FinSight</span> Advanced Financial Analytics",
+                introP1: "The platform is specifically designed to provide a professional workspace that supports executive decision-making. Through an advanced interface based on International Financial Reporting Standards (IFRS), FinSight allows you to transform raw trial balances into interactive dashboards and accurate financial statements.",
+                introP2: "The workflow begins with uploading the trial balance, allowing the platform to automatically map accounts and prepare financial statements according to the latest standards. These figures are then transformed into clear visual charts and precise period-over-period comparisons, providing management with a comprehensive visual summary to evaluate the entity's financial performance step by step.",
+                footerText: "FinSight © 2026 All Rights Reserved | Developed by: <span class='developer-name'>Ahmed Abdelbaset</span> <a href='https://www.facebook.com/YOUR_PROFILE_LINK' target='_blank' class='social-link' title='Contact me on Facebook'><i class='fa-brands fa-facebook'></i></a>"
+            }
+        };
+
+        function initPage() {
+            if (isLightMode) {
+                document.body.classList.add('light-mode');
+                document.querySelector('#themeToggle i').className = 'fa-solid fa-moon';
+            }
+            
+            if (currentLang === 'en') {
+                document.documentElement.dir = 'ltr';
+                document.documentElement.lang = 'en';
+                document.querySelector('#langToggle span').innerText = 'العربية';
+            }
+            
+            updateTexts();
+        }
+
+        function updateTexts() {
+            const themeText = document.getElementById('themeText');
+            themeText.innerText = isLightMode ? translations[currentLang].themeDark : translations[currentLang].themeLight;
+
+            const elementsToTranslate = document.querySelectorAll('[data-i18n]');
+            elementsToTranslate.forEach(el => {
+                const translationKey = el.getAttribute('data-i18n');
+                if (translations[currentLang][translationKey]) {
+                    el.innerHTML = translations[currentLang][translationKey];
+                }
+            });
+        }
+
         function toggleTheme() {
+            isLightMode = !isLightMode;
+            localStorage.setItem('finSightTheme', isLightMode ? 'light' : 'dark'); 
+            
             const body = document.body;
-            const themeBtn = document.getElementById('themeToggle');
+            const themeIcon = document.querySelector('#themeToggle i');
             
-            body.classList.toggle('light-mode');
+            body.classList.toggle('light-mode', isLightMode);
+            themeIcon.className = isLightMode ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
             
-            if (body.classList.contains('light-mode')) {
-                themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i> الوضع الداكن';
-            } else {
-                themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i> الوضع الفاتح';
-            }
+            updateTexts();
         }
 
-        // دالة تبديل اللغة (تجهيز مبدئي)
         function toggleLanguage() {
-            const langBtn = document.getElementById('langToggle');
-            if (langBtn.innerText.includes("English")) {
-                langBtn.innerHTML = '<i class="fa-solid fa-globe"></i> العربية';
-                // هنا يمكن إضافة كود تغيير نصوص الصفحة للإنجليزية
-            } else {
-                langBtn.innerHTML = '<i class="fa-solid fa-globe"></i> English';
-            }
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('finSightLang', currentLang); 
+            
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = currentLang;
+
+            const langBtnText = document.querySelector('#langToggle span');
+            langBtnText.innerText = currentLang === 'ar' ? 'English' : 'العربية';
+
+            updateTexts();
         }
+
+        document.addEventListener('DOMContentLoaded', initPage);
     </script>
 </body>
 </html>

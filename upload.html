@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>رفع ميزان المراجعة</title>
+    <title>رفع ميزان المراجعة | FinSight</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
@@ -37,8 +37,15 @@
             margin-bottom: 30px;
             border-bottom: 2px solid #e2e8f0;
             padding-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
         h2 { margin: 0; color: var(--primary-color); font-size: 24px; }
+        
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
         
         .btn {
             padding: 10px 20px;
@@ -48,15 +55,15 @@
             font-weight: bold;
             transition: all 0.3s ease;
             font-family: inherit;
-        }
-        .btn-download {
-            background-color: var(--primary-color);
-            color: white;
             display: flex;
             align-items: center;
             gap: 8px;
         }
+        .btn-download { background-color: var(--primary-color); color: white; }
         .btn-download:hover { background-color: #1e293b; }
+        
+        .btn-danger { background-color: var(--danger-color); color: white; }
+        .btn-danger:hover { background-color: #dc2626; }
         
         .drop-zone { 
             border: 2px dashed #cbd5e1; 
@@ -117,9 +124,14 @@
 <div class="container">
     <div class="header-section">
         <h2>استيراد ميزان المراجعة</h2>
-        <button class="btn btn-download" onclick="downloadTemplate()">
-            📥 تحميل قالب الإكسيل
-        </button>
+        <div class="header-actions">
+            <button class="btn btn-danger" onclick="resetData()">
+                🗑️ تصفير البيانات
+            </button>
+            <button class="btn btn-download" onclick="downloadTemplate()">
+                📥 تحميل قالب الإكسيل
+            </button>
+        </div>
     </div>
 
     <div class="drop-zone" id="dropZone">
@@ -160,12 +172,23 @@
     function downloadTemplate() {
         const templateData = [
             ["السنة", "الشهر", "كود الحساب", "اسم الحساب", "مدين", "دائن"],
-            ["2026", "6", "1001", "نقدية بالصندوق", "0", "0"], // مثال توضيحي
+            ["2026", "6", "1001", "نقدية بالصندوق", "0", "0"], 
         ];
         const ws = XLSX.utils.aoa_to_sheet(templateData);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Trial_Balance");
         XLSX.writeFile(wb, "FinSight_Template.xlsx");
+    }
+
+    // دالة تصفير البيانات
+    function resetData() {
+        if (confirm("هل أنت متأكد من رغبتك في مسح كافة البيانات وتصفير الميزان؟")) {
+            fileInput.value = ''; // تفريغ الملف المختار
+            statusMessage.style.display = 'none'; // إخفاء رسالة الحالة
+            mappingSection.style.display = 'none'; // إخفاء جدول التوجيه
+            mappingTableBody.innerHTML = ''; // مسح محتوى الجدول
+            // localStorage.removeItem('accountMapping'); // يمكنك تفعيل هذا السطر إذا أردت مسح التوجيهات المحفوظة مسبقاً أيضاً
+        }
     }
 
     const ifrsCategories = [
@@ -199,7 +222,6 @@
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, {type: 'array'});
             const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-            // defval: 0 تمنع أن تكون الخلايا الفارغة undefined
             const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: 0 }); 
             validateAndProcessData(jsonData);
         };
@@ -211,13 +233,15 @@
         let totalCredit = 0;
         const uniqueAccounts = [];
 
-        data.forEach((row, index) => {
-            // القراءة المرنة: البحث عن أي عمود يحتوي على كلمة مدين أو دائن لتجنب مشكلة المسافات
+        data.forEach((row) => {
             const keys = Object.keys(row);
             
+            // تم التعديل هنا: دقة أكبر في البحث عن اسم وكود الحساب لمنع التداخل
             const debitKey = keys.find(k => k.includes('مدين') || k.toLowerCase().includes('debit'));
             const creditKey = keys.find(k => k.includes('دائن') || k.toLowerCase().includes('credit'));
-            const nameKey = keys.find(k => k.includes('اسم') || k.includes('حساب') || k.toLowerCase().includes('name'));
+            
+            // نبحث عن "اسم" أو "البيان" بدلاً من كلمة "حساب" العامة
+            const nameKey = keys.find(k => k.includes('اسم') || k.includes('البيان') || k.toLowerCase().includes('name'));
             const codeKey = keys.find(k => k.includes('كود') || k.includes('رقم') || k.toLowerCase().includes('code'));
 
             const debit = parseFloat(row[debitKey]) || 0;
@@ -229,13 +253,12 @@
             if (row[nameKey]) {
                 uniqueAccounts.push({
                     code: row[codeKey] || '-',
-                    name: row[nameKey],
+                    name: row[nameKey], // الآن سيقرأ الاسم الفعلي ولن يتداخل مع الكود
                     balance: debit > 0 ? debit.toLocaleString() + ' (مدين)' : credit.toLocaleString() + ' (دائن)'
                 });
             }
         });
 
-        // التحقق من أن الميزان ليس فارغاً (أكبر من صفر)
         if (totalDebit === 0 && totalCredit === 0) {
             showStatus(`❌ لم يتم العثور على أرقام! يرجى التأكد من أن الأعمدة تحتوي على كلمة "مدين" و "دائن".`, 'error');
             mappingSection.style.display = "none";
@@ -270,7 +293,7 @@
             tr.innerHTML = `
                 <td><strong>${acc.code}</strong></td>
                 <td>${acc.name}</td>
-                <td>${acc.balance}</td>
+                <td><span style="color: #64748b;">${acc.balance}</span></td>
                 <td>${selectHTML}</td>
             `;
             mappingTableBody.appendChild(tr);
@@ -289,7 +312,6 @@
         });
         localStorage.setItem('accountMapping', JSON.stringify(mappingData));
         alert("تم حفظ التوجيه بنجاح!");
-        // window.location.href = 'statements.html'; // الانتقال للصفحة التالية
     }
 </script>
 

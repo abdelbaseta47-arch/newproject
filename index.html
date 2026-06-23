@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FinSight - منصة التحليل المالي</title>
-    <!-- استيراد الخطوط -->
+    <!-- استيراد الخطوط الاحترافية -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- مكتبة الأيقونات -->
+    <!-- مكتبة الأيقونات الشهيرة -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
@@ -22,6 +22,7 @@
             --text-muted: #8892b0;
             --accent-gold: #ffd700;
             --border-color: #233554;
+            --danger-color: #ff5f56;
             --font-main: 'Tajawal', sans-serif;
             --font-title: 'Cairo', sans-serif;
             --sidebar-width: 70px;
@@ -224,6 +225,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            margin-top: auto;
         }
 
         .developer-name {
@@ -232,7 +234,7 @@
         }
 
         .social-link {
-            color: #1877F2; /* لون الفيسبوك */
+            color: #1877F2;
             font-size: 20px;
             margin-inline-start: 10px;
             text-decoration: none;
@@ -312,7 +314,7 @@
         <footer>
             <div data-i18n="footerText">
                 FinSight © 2026 جميع الحقوق محفوظة | تم التطوير بواسطة: <span class='developer-name'>أحمد عبد الباسط</span>
-                <a href="https://www.facebook.com/ahmed.mamdo2" target="_blank" class="social-link" title="تواصل معي على فيسبوك">
+                <a href="https://www.facebook.com/your-profile-link" target="_blank" class="social-link" title="تواصل معي على فيسبوك">
                     <i class="fa-brands fa-facebook"></i>
                 </a>
             </div>
@@ -321,16 +323,57 @@
 
     <!-- سكربت التحكم والتفاعل (المترجم الذكي والحفظ السحابي) -->
     <script>
+        // دالة التنقل الذكي الحقيقية
         function navigateTo(page) {
-            const items = document.querySelectorAll('.nav-item');
-            items.forEach(item => item.classList.remove('active'));
-            event.currentTarget.classList.add('active');
-            // سيتم هنا لاحقاً كود الانتقال الفعلي للصفحات الأخرى
+            // خريطة الربط الفعلي بين أسماء الأزرار والملفات البرمجية
+            const pageMap = {
+                'home': 'index.html',
+                'upload': 'upload.html',
+                'statements': 'statements.html',
+                'analysis': 'analysis.html',
+                'ai': 'ai.html'
+            };
+            
+            const targetUrl = pageMap[page] || page;
+
+            try {
+                // منع الخطأ في بيئة المعاينة (blob URL) وإظهار رسالة بديلة
+                if (window.location.protocol === 'blob:') {
+                    showPreviewMessage();
+                    return;
+                }
+                window.location.href = targetUrl;
+            } catch (error) {
+                console.error("Navigation error:", error);
+                showPreviewMessage();
+            }
         }
 
+        // إظهار رسالة توضيحية منبثقة في وضع المعاينة
+        function showPreviewMessage() {
+            let msgBox = document.getElementById('preview-msg');
+            if (!msgBox) {
+                msgBox = document.createElement('div');
+                msgBox.id = 'preview-msg';
+                msgBox.style.cssText = 'position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:var(--danger-color, #ff5f56);color:#fff;padding:15px 25px;border-radius:8px;z-index:9999;font-family:var(--font-main, sans-serif);font-weight:bold;box-shadow:0 4px 15px rgba(0,0,0,0.3); text-align:center;';
+                document.body.appendChild(msgBox);
+            }
+            msgBox.innerText = currentLang === 'ar' 
+                ? 'التنقل بين الصفحات معطل في نافذة المعاينة هذه 🚫. سيعمل بشكل ممتاز عند تشغيل الملفات من جهازك الشخصي.'
+                : 'Page navigation is disabled in this preview window 🚫. It will work perfectly when opened from your local device.';
+            
+            setTimeout(() => {
+                if (msgBox && msgBox.parentNode) {
+                    msgBox.parentNode.removeChild(msgBox);
+                }
+            }, 5000);
+        }
+
+        // متغيرات النظام (مع قراءة الإعدادات المحفوظة في ذاكرة المتصفح)
         let isLightMode = localStorage.getItem('finSightTheme') === 'light';
         let currentLang = localStorage.getItem('finSightLang') || 'ar';
 
+        // قاموس الترجمة (عربي - إنجليزي)
         const translations = {
             ar: {
                 navHome: "الرئيسية",
@@ -343,7 +386,7 @@
                 introTitle: "مرحباً بك في منصة <span>FinSight</span> للتحليل المالي المتقدم",
                 introP1: "المنصة مصممة خصيصاً لتوفير بيئة عمل احترافية تدعم اتخاذ القرارات الإدارية. من خلال واجهة متقدمة تعتمد على معايير التقارير المالية الدولية (IFRS)، تتيح لك FinSight تحويل موازين المراجعة الخام إلى لوحات بيانات تفاعلية وقوائم مالية دقيقة.",
                 introP2: "تبدأ دورة العمل برفع ميزان المراجعة، لتقوم المنصة آلياً بتوجيه الحسابات وإعداد القوائم المالية وفق أحدث المعايير. بعد ذلك، يتم تحويل هذه الأرقام إلى رسوم بيانية ومقارنات فترية دقيقة، مما يضع بين يدي الإدارة ملخصاً بصرياً شاملاً يسهل قراءته وتحليله لتقييم الأداء المالي للمنشأة خطوة بخطوة.",
-                footerText: "FinSight © 2026 جميع الحقوق محفوظة | تم التطوير بواسطة: <span class='developer-name'>أحمد عبد الباسط</span> <a href='https://www.facebook.com/ahmed.mamdo2' target='_blank' class='social-link' title='تواصل معي على فيسبوك'><i class='fa-brands fa-facebook'></i></a>"
+                footerText: "FinSight © 2026 جميع الحقوق محفوظة | تم التطوير بواسطة: <span class='developer-name'>أحمد عبد الباسط</span> <a href='https://www.facebook.com/your-profile-link' target='_blank' class='social-link' title='تواصل معي على فيسبوك'><i class='fa-brands fa-facebook'></i></a>"
             },
             en: {
                 navHome: "Home",
@@ -356,25 +399,25 @@
                 introTitle: "Welcome to <span>FinSight</span> Advanced Financial Analytics",
                 introP1: "The platform is specifically designed to provide a professional workspace that supports executive decision-making. Through an advanced interface based on International Financial Reporting Standards (IFRS), FinSight allows you to transform raw trial balances into interactive dashboards and accurate financial statements.",
                 introP2: "The workflow begins with uploading the trial balance, allowing the platform to automatically map accounts and prepare financial statements according to the latest standards. These figures are then transformed into clear visual charts and precise period-over-period comparisons, providing management with a comprehensive visual summary to evaluate the entity's financial performance step by step.",
-                footerText: "FinSight © 2026 All Rights Reserved | Developed by: <span class='developer-name'>Ahmed Abdelbaset</span> <a href='https://www.facebook.com/ahmed.mamdo2' target='_blank' class='social-link' title='Contact me on Facebook'><i class='fa-brands fa-facebook'></i></a>"
+                footerText: "FinSight © 2026 All Rights Reserved | Developed by: <span class='developer-name'>Ahmed Abdelbaset</span> <a href='https://www.facebook.com/your-profile-link' target='_blank' class='social-link' title='Contact me on Facebook'><i class='fa-brands fa-facebook'></i></a>"
             }
         };
 
+        // دالة التهيئة والمزامنة عند التحميل
         function initPage() {
             if (isLightMode) {
                 document.body.classList.add('light-mode');
                 document.querySelector('#themeToggle i').className = 'fa-solid fa-moon';
             }
-            
             if (currentLang === 'en') {
                 document.documentElement.dir = 'ltr';
                 document.documentElement.lang = 'en';
                 document.querySelector('#langToggle span').innerText = 'العربية';
             }
-            
             updateTexts();
         }
 
+        // تحديث جميع النصوص بناءً على اللغة المحددة
         function updateTexts() {
             const themeText = document.getElementById('themeText');
             themeText.innerText = isLightMode ? translations[currentLang].themeDark : translations[currentLang].themeLight;
@@ -388,29 +431,22 @@
             });
         }
 
+        // تبديل المظهر وحفظ الاختيار
         function toggleTheme() {
             isLightMode = !isLightMode;
-            localStorage.setItem('finSightTheme', isLightMode ? 'light' : 'dark'); 
-            
-            const body = document.body;
-            const themeIcon = document.querySelector('#themeToggle i');
-            
-            body.classList.toggle('light-mode', isLightMode);
-            themeIcon.className = isLightMode ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
-            
+            localStorage.setItem('finSightTheme', isLightMode ? 'light' : 'dark');
+            document.body.classList.toggle('light-mode', isLightMode);
+            document.querySelector('#themeToggle i').className = isLightMode ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
             updateTexts();
         }
 
+        // تبديل اللغة والترجمة الفورية مع حفظ الاختيار
         function toggleLanguage() {
             currentLang = currentLang === 'ar' ? 'en' : 'ar';
-            localStorage.setItem('finSightLang', currentLang); 
-            
+            localStorage.setItem('finSightLang', currentLang);
             document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
             document.documentElement.lang = currentLang;
-
-            const langBtnText = document.querySelector('#langToggle span');
-            langBtnText.innerText = currentLang === 'ar' ? 'English' : 'العربية';
-
+            document.querySelector('#langToggle span').innerText = currentLang === 'ar' ? 'English' : 'العربية';
             updateTexts();
         }
 

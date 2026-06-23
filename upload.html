@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinSight - رفع ميزان المراجعة</title>
+    <!-- استيراد الخطوط -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- مكتبة الأيقونات -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- مكتبة قراءة وتوليد ملفات الإكسيل SheetJS -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    
+    <style>
+        /* إعدادات المتغيرات للوضع الداكن (الافتراضي) */
+        :root {
+            --bg-main: #020c1b;
+            --bg-surface: #0a192f;
+            --bg-sidebar: #112240;
+            --text-title: #64ffda;
+            --text-main: #e6f1ff;
+            --text-muted: #8892b0;
+            --accent-gold: #ffd700;
+            --border-color: #233554;
+            --danger-color: #ff5f56;
+            --danger-hover: #e04f46;
+            --success-color: #27c93f;
+            --font-main: 'Tajawal', sans-serif;
+            --font-title: 'Cairo', sans-serif;
+            --sidebar-width: 70px;
+            --sidebar-width-expanded: 260px;
+        }
+
+        /* متغيرات الوضع الفاتح */
+        body.light-mode {
+            --bg-main: #f3f4f6;
+            --bg-surface: #ffffff;
+            --bg-sidebar: #ffffff;
+            --text-title: #0052cc;
+            --text-main: #111827;
+            --text-muted: #4b5563;
+            --accent-gold: #d97706;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* الشريط الجانبي (Sidebar) */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            inset-inline-start: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: var(--bg-sidebar);
+            border-inline-end: 1px solid var(--border-color);
+            z-index: 1000;
+            overflow-x: hidden;
+            transition: width 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            padding-top: 20px;
+        }
+
+        .sidebar:hover {
+            width: var(--sidebar-width-expanded);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            margin-bottom: 40px;
+            white-space: nowrap;
+        }
+
+        .logo-icon {
+            font-size: 28px;
+            color: var(--accent-gold);
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .logo-text {
+            font-family: var(--font-title);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-title);
+            margin-inline-start: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .sidebar:hover .logo-text {
+            opacity: 1;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            border-inline-end: 4px solid transparent;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background-color: rgba(100, 255, 218, 0.1);
+            color: var(--text-title);
+            border-inline-end: 4px solid var(--text-title);
+        }
+
+        body.light-mode .nav-item:hover, body.light-mode .nav-item.active {
+            background-color: rgba(0, 82, 204, 0.1);
+        }
+
+        .nav-icon {
+            font-size: 22px;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .nav-text {
+            font-size: 16px;
+            font-weight: 500;
+            margin-inline-start: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .sidebar:hover .nav-text {
+            opacity: 1;
+        }
+
+        /* محتوى الصفحة الرئيسي */
+        .main-content {
+            margin-inline-start: var(--sidebar-width);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            transition: margin-inline-start 0.3s ease;
+        }
+
+        /* الشريط العلوي */
+        .top-bar {
+            height: 60px;
+            background-color: var(--bg-surface);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0 30px;
+            gap: 20px;
+        }
+
+        .action-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            color: var(--text-title);
+            border-color: var(--text-title);
+        }
+
+        /* حاوية الأدوات والرفع */
+        .upload-container {
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            flex-grow: 1;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-title {
+            font-family: var(--font-title);
+            font-size: 32px;
+            color: var(--text-main);
+        }
+
+        .page-title span {
+            color: var(--text-title);
+        }
+
+        /* منطقة الخيارات والتحميل */
+        .actions-wrapper {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn-download {
+            background-color: transparent;
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-download:hover {
+            background-color: rgba(255, 215, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: transparent;
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+
+        .btn-danger:hover {
+            background-color: rgba(255, 95, 86, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* لوحة سحب وإفلات الملفات */
+        .dropzone-area {
+            background-color: var(--bg-surface);
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 50px 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .dropzone-area:hover, .dropzone-area.dragover {
+            border-color: var(--text-title);
+            background-color: rgba(100, 255, 218, 0.02);
+        }
+
+        .dropzone-icon {
+            font-size: 50px;
+            color: var(--text-title);
+            margin-bottom: 15px;
+        }
+
+        .dropzone-text h3 {
+            font-family: var(--font-title);
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        .dropzone-text p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        #fileInput {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* حالة الرفع وحالة البيانات */
+        .status-box {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: none;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .status-box.success {
+            border-color: var(--success-color);
+            display: flex;
+        }
+
+        .status-box.success i {
+            color: var(--success-color);
+            font-size: 24px;
+        }
+
+        /* جدول استعراض البيانات المرفوعة */
+        .preview-section {
+            display: none;
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 40px;
+        }
+
+        .preview-title {
+            font-family: var(--font-title);
+            font-size: 22px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 400px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: right;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 15px;
+        }
+
+        th {
+            background-color: var(--bg-sidebar);
+            color: var(--text-title);
+            font-family: var(--font-title);
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background-color: rgba(100, 255, 218, 0.02);
+        }
+
+        /* التنبيه المنبثق للتأكيد */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 30px;
+            max-width: 450px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-card h3 {
+            font-family: var(--font-title);
+            font-size: 22px;
+            margin-bottom: 15px;
+            color: var(--danger-color);
+        }
+
+        .modal-card p {
+            color: var(--text-muted);
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .btn-modal-confirm {
+            background-color: var(--danger-color);
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-modal-cancel {
+            background-color: var(--border-color);
+            color: var(--text-main);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* التذييل */
+        footer {
+            background-color: var(--bg-surface);
+            border-top: 1px solid var(--border-color);
+            padding: 25px 40px;
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .developer-name {
+            color: var(--accent-gold);
+            font-weight: bold;
+        }
+
+        .social-link {
+            color: #1877F2;
+            font-size: 20px;
+            margin-inline-start: 10px;
+            text-decoration: none;
+            transition: transform 0.3s;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .social-link:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- الشريط الجانبي -->
+    <nav class="sidebar" id="sidebar">
+        <div class="logo-container">
+            <i class="fa-solid fa-chart-pie logo-icon"></i>
+            <span class="logo-text">FinSight</span>
+        </div>
+
+        <div class="nav-item" onclick="navigateTo('index.html')">
+            <i class="fa-solid fa-house nav-icon"></i>
+            <span class="nav-text" data-i18n="navHome">الرئيسية</span>
+        </div>
+        
+        <div class="nav-item active" onclick="navigateTo('upload.html')">
+            <i class="fa-solid fa-cloud-arrow-up nav-icon"></i>
+            <span class="nav-text" data-i18n="navUpload">رفع ميزان المراجعة</span>
+        </div>
+
+        <div class="nav-item" onclick="navigateTo('statements.html')">
+            <i class="fa-solid fa-file-invoice-dollar nav-icon"></i>
+            <span class="nav-text" data-i18n="navStatements">القوائم المالية</span>
+        </div>
+
+        <div class="nav-item" onclick="navigateTo('analysis.html')">
+            <i class="fa-solid fa-chart-line nav-icon"></i>
+            <span class="nav-text" data-i18n="navAnalysis">التحليلات والمقارنات</span>
+        </div>
+
+        <div class="nav-item" onclick="navigateTo('ai.html')">
+            <i class="fa-solid fa-robot nav-icon"></i>
+            <span class="nav-text" data-i18n="navAi">المساعد الذكي</span>
+        </div>
+    </nav>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content">
+        <!-- الشريط العلوي -->
+        <div class="top-bar">
+            <button class="action-btn" id="langToggle" onclick="toggleLanguage()">
+                <i class="fa-solid fa-globe"></i> <span>English</span>
+            </button>
+            <button class="action-btn" id="themeToggle" onclick="toggleTheme()">
+                <i class="fa-solid fa-sun"></i> <span id="themeText" data-i18n="themeLight">الوضع الفاتح</span>
+            </button>
+        </div>
+
+        <!-- مساحة الرفع -->
+        <div class="upload-container">
+            <div class="page-header">
+                <h1 class="page-title" data-i18n="pageTitle">إدارة ورفع <span>البيانات المالية</span></h1>
+            </div>
+
+            <!-- أزرار الإجراءات السريعة -->
+            <div class="actions-wrapper">
+                <button class="btn-download" onclick="generateAndDownloadTemplate()">
+                    <i class="fa-solid fa-file-excel"></i> <span data-i18n="btnTemplate">تحميل قالب Excel الفارغ</span>
+                </button>
+                <button class="btn-danger" id="btnClearData" onclick="showConfirmModal()" style="display: none;">
+                    <i class="fa-solid fa-trash-can"></i> <span data-i18n="btnClear">حذف وتصفير المنصة</span>
+                </button>
+            </div>
+
+            <!-- صندوق السحب والإفلات المباشر للـ Excel -->
+            <div class="dropzone-area" id="dropzone">
+                <div class="dropzone-icon">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <div class="dropzone-text">
+                    <h3 data-i18n="dropTitle">قم بسحب وإفلات ملف ميزان المراجعة هنا</h3>
+                    <p data-i18n="dropSubtitle">أو اضغط لاختيار الملف من جهازك (يدعم صيغ .xlsx, .xls, .csv)</p>
+                </div>
+                <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" onchange="handleFileSelect(event)">
+            </div>
+
+            <!-- صندوق حالة الرفع الناجحة -->
+            <div class="status-box" id="statusBox">
+                <i class="fa-solid fa-circle-check"></i>
+                <div>
+                    <h4 style="font-weight: 700; margin-bottom: 4px;" data-i18n="statusSuccessTitle">تم رفع ميزان المراجعة بنجاح!</h4>
+                    <p style="font-size: 14px; color: var(--text-muted);" id="statusDetails"></p>
+                </div>
+            </div>
+
+            <!-- قسم المعاينة للجدول المرفوع -->
+            <div class="preview-section" id="previewSection">
+                <div class="preview-title">
+                    <span data-i18n="previewHeader">معاينة ميزان المراجعة المرفوع</span>
+                    <span style="font-size: 14px; color: var(--text-title);" id="rowCount"></span>
+                </div>
+                <div class="table-wrapper">
+                    <table id="previewTable">
+                        <thead>
+                            <tr id="tableHeader">
+                                <!-- سيتم توليد رؤوس الأعمدة برمجياً -->
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- سيتم تعبئة البيانات هنا -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- التنبيه التأكيدي المنبثق لمسح البيانات -->
+        <div class="modal" id="confirmModal">
+            <div class="modal-card">
+                <h3 data-i18n="modalConfirmTitle">تنبيه أمني هام!</h3>
+                <p data-i18n="modalConfirmBody">هل أنت متأكد من رغبتك في حذف كافة البيانات المالية المرفوعة وتصفير كافة تحليلات وقوائم المنصة؟ لا يمكن التراجع عن هذا الإجراء.</p>
+                <div class="modal-buttons">
+                    <button class="btn-modal-confirm" onclick="clearFinancialData()" data-i18n="modalConfirmBtn">نعم، تصفير المنصة</button>
+                    <button class="btn-modal-cancel" onclick="closeConfirmModal()" data-i18n="modalCancelBtn">إلغاء</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- التذييل -->
+        <footer>
+            <div>
+                <span data-i18n="footerText">FinSight © 2026 جميع الحقوق محفوظة | تم التطوير بواسطة: </span><span class='developer-name'>أحمد عبد الباسط</span>
+                <a href="https://www.facebook.com/your-profile-link" target="_blank" class="social-link" title="Contact me on Facebook">
+                    <i class="fa-brands fa-facebook"></i>
+                </a>
+            </div>
+        </footer>
+    </main>
+
+    <!-- السيناريوهات والمنطق البرمجي لقراءة البيانات وحفظها سحابياً -->
+    <script>
+        // إعدادات اللغة والمظهر المتزامنة سحابياً عبر localStorage
+        let isLightMode = localStorage.getItem('finSightTheme') === 'light';
+        let currentLang = localStorage.getItem('finSightLang') || 'ar';
+
+        const translations = {
+            ar: {
+                navHome: "الرئيسية",
+                navUpload: "رفع ميزان المراجعة",
+                navStatements: "القوائم المالية",
+                navAnalysis: "التحليلات والمقارنات",
+                navAi: "المساعد الذكي",
+                themeLight: "الوضع الفاتح",
+                themeDark: "الوضع الداكن",
+                pageTitle: "إدارة ورفع <span>البيانات المالية</span>",
+                btnTemplate: "تحميل قالب Excel المتوافق مع IFRS",
+                btnClear: "حذف وتصفير المنصة",
+                dropTitle: "قم بسحب وإفلات ملف ميزان المراجعة هنا",
+                dropSubtitle: "أو اضغط لاختيار الملف من جهازك (يدعم صيغ .xlsx, .xls, .csv)",
+                statusSuccessTitle: "تم رفع ميزان المراجعة بنجاح واستخلاص البيانات!",
+                previewHeader: "معاينة ميزان المراجعة المرفوع (IFRS)",
+                modalConfirmTitle: "تنبيه أمني هام!",
+                modalConfirmBody: "هل أنت متأكد من رغبتك في حذف كافة البيانات المالية المرفوعة وتصفير كافة تحليلات وقوائم المنصة؟ لا يمكن التراجع عن هذا الإجراء.",
+                modalConfirmBtn: "نعم، تصفير المنصة",
+                modalCancelBtn: "إلغاء",
+                footerText: "FinSight © 2026 جميع الحقوق محفوظة | تم التطوير بواسطة: "
+            },
+            en: {
+                navHome: "Home",
+                navUpload: "Upload Trial Balance",
+                navStatements: "Financial Statements",
+                navAnalysis: "Analytics & Comparisons",
+                navAi: "AI Assistant",
+                themeLight: "Light Mode",
+                themeDark: "Dark Mode",
+                pageTitle: "Manage & Upload <span>Financial Data</span>",
+                btnTemplate: "Download IFRS-Compliant Excel Template",
+                btnClear: "Clear & Reset Platform",
+                dropTitle: "Drag and drop your Trial Balance file here",
+                dropSubtitle: "Or click to select a file from your device (Supports .xlsx, .xls, .csv)",
+                statusSuccessTitle: "Trial Balance successfully uploaded and processed!",
+                previewHeader: "Uploaded Trial Balance Preview (IFRS)",
+                modalConfirmTitle: "Important Security Alert!",
+                modalConfirmBody: "Are you sure you want to permanently delete all uploaded financial data and reset the entire platform? This action cannot be undone.",
+                modalConfirmBtn: "Yes, Reset Platform",
+                modalCancelBtn: "Cancel",
+                footerText: "FinSight © 2026 All Rights Reserved | Developed by: "
+            }
+        };
+
+        // دالة الانتقال الحقيقية بين الصفحات
+        function navigateTo(url) {
+            window.location.href = url;
+        }
+
+        // دالة التهيئة المزامنة
+        function initPage() {
+            if (isLightMode) {
+                document.body.classList.add('light-mode');
+                document.querySelector('#themeToggle i').className = 'fa-solid fa-moon';
+            }
+            if (currentLang === 'en') {
+                document.documentElement.dir = 'ltr';
+                document.documentElement.lang = 'en';
+                document.querySelector('#langToggle span').innerText = 'العربية';
+            }
+            updateTexts();
+            checkExistingData();
+        }
+
+        // تحديث النصوص
+        function updateTexts() {
+            const themeText = document.getElementById('themeText');
+            themeText.innerText = isLightMode ? translations[currentLang].themeDark : translations[currentLang].themeLight;
+
+            const elementsToTranslate = document.querySelectorAll('[data-i18n]');
+            elementsToTranslate.forEach(el => {
+                const translationKey = el.getAttribute('data-i18n');
+                if (translations[currentLang][translationKey]) {
+                    el.innerHTML = translations[currentLang][translationKey];
+                }
+            });
+        }
+
+        // تبديل المظهر
+        function toggleTheme() {
+            isLightMode = !isLightMode;
+            localStorage.setItem('finSightTheme', isLightMode ? 'light' : 'dark');
+            document.body.classList.toggle('light-mode', isLightMode);
+            document.querySelector('#themeToggle i').className = isLightMode ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+            updateTexts();
+        }
+
+        // تبديل اللغة
+        function toggleLanguage() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('finSightLang', currentLang);
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = currentLang;
+            document.querySelector('#langToggle span').innerText = currentLang === 'ar' ? 'English' : 'العربية';
+            updateTexts();
+            
+            // إعادة بناء الجدول إذا وجدت بيانات لتحديث ترويسة الأعمدة حسب اللغة المحددة
+            const rawData = localStorage.getItem('financialData');
+            if (rawData) {
+                renderTable(JSON.parse(rawData));
+            }
+        }
+
+        // فحص وجود بيانات سابقة في ذاكرة المتصفح لعرضها مباشرة
+        function checkExistingData() {
+            const savedData = localStorage.getItem('financialData');
+            if (savedData) {
+                const parsedData = JSON.parse(savedData);
+                showSuccessStatus(parsedData.length);
+                renderTable(parsedData);
+                document.getElementById('btnClearData').style.display = 'inline-flex';
+            }
+        }
+
+        // معالجة اختيار الملف وقراءته بالكامل
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            processExcelFile(file);
+        }
+
+        // معالجة السحب والإفلات
+        const dropzone = document.getElementById('dropzone');
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+        dropzone.addEventListener('dragleave', () => {
+            dropzone.classList.remove('dragover');
+        });
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) {
+                processExcelFile(file);
+            }
+        });
+
+        // قراءة ومعالجة ملف الإكسيل ومطابقته ببيانات IFRS
+        function processExcelFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                // تحويل الشيت إلى مصفوفة جيسون
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                
+                if (jsonData.length === 0) {
+                    alert(currentLang === 'ar' ? 'الملف المرفوع فارغ!' : 'Uploaded file is empty!');
+                    return;
+                }
+
+                // حفظ البيانات في المتصفح
+                localStorage.setItem('financialData', JSON.stringify(jsonData));
+                
+                // إظهار واجهة النجاح والجدول المعاين
+                showSuccessStatus(jsonData.length, file.name);
+                renderTable(jsonData);
+                document.getElementById('btnClearData').style.display = 'inline-flex';
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        // إظهار صندوق النجاح
+        function showSuccessStatus(rowsCount, filename = '') {
+            const statusBox = document.getElementById('statusBox');
+            const statusDetails = document.getElementById('statusDetails');
+            statusBox.classList.add('success');
+            
+            if (currentLang === 'ar') {
+                statusDetails.innerText = `تم استيراد ${rowsCount} سجلاً بنجاح من الملف ${filename ? `'${filename}'` : ''}. تم دمج وتوجيه الأرقام آلياً.`;
+            } else {
+                statusDetails.innerText = `Successfully imported ${rowsCount} records from the file ${filename ? `'${filename}'` : ''}. Data mapped automatically.`;
+            }
+        }
+
+        // رسم جدول المعاينة ديناميكياً ليدعم العربية والإنجليزية
+        function renderTable(data) {
+            const previewSection = document.getElementById('previewSection');
+            const headerRow = document.getElementById('tableHeader');
+            const tableBody = document.getElementById('tableBody');
+            const rowCountText = document.getElementById('rowCount');
+
+            headerRow.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            if (data.length === 0) {
+                previewSection.style.display = 'none';
+                return;
+            }
+
+            // تحديد أسماء الحقول بناءً على اللغة
+            const headers = currentLang === 'ar' 
+                ? ["التاريخ", "كود الحساب", "اسم الحساب", "الرصيد"]
+                : ["Date", "Account Code", "Account Name", "Balance"];
+
+            // بناء ترويسة الجدول
+            headers.forEach(headerText => {
+                const th = document.createElement('th');
+                th.innerText = headerText;
+                headerRow.appendChild(th);
+            });
+
+            // العثور على المفاتيح الحقيقية في جيسون للتوفيق الذكي (عربي وإنجليزي)
+            const sample = data[0];
+            const keys = Object.keys(sample);
+            
+            // خرائط توجيه ذكية للمفاتيح
+            const dateKey = keys.find(k => k.includes('التاريخ') || k.toLowerCase().includes('date')) || keys[0];
+            const codeKey = keys.find(k => k.includes('كود') || k.toLowerCase().includes('code')) || keys[1];
+            const nameKey = keys.find(k => k.includes('اسم') || k.toLowerCase().includes('name')) || keys[2];
+            const balanceKey = keys.find(k => k.includes('رصيد') || k.toLowerCase().includes('balance') || k.includes('الرصيد')) || keys[3];
+
+            // تعبئة البيانات (أول 50 سجلاً فقط للمعاينة حفاظاً على أداء المتصفح)
+            const limit = Math.min(data.length, 50);
+            for (let i = 0; i < limit; i++) {
+                const row = data[i];
+                const tr = document.createElement('tr');
+
+                const tdDate = document.createElement('td');
+                tdDate.innerText = formatDate(row[dateKey]);
+                
+                const tdCode = document.createElement('td');
+                tdCode.innerText = row[codeKey] || '';
+                
+                const tdName = document.createElement('td');
+                tdName.innerText = row[nameKey] || '';
+                
+                const tdBalance = document.createElement('td');
+                tdBalance.innerText = formatNumber(row[balanceKey]);
+                tdBalance.style.fontWeight = 'bold';
+
+                tr.appendChild(tdDate);
+                tr.appendChild(tdCode);
+                tr.appendChild(tdName);
+                tr.appendChild(tdBalance);
+
+                tableBody.appendChild(tr);
+            }
+
+            // إظهار المجموع أو العدد الكلي
+            rowCountText.innerText = currentLang === 'ar' 
+                ? `يعرض أول 50 سجلاً من إجمالي ${data.length}`
+                : `Showing first 50 of ${data.length} records`;
+
+            previewSection.style.display = 'block';
+        }
+
+        // تنسيق التاريخ والشهور بشكل مقروء
+        function formatDate(value) {
+            if (!value) return '';
+            if (typeof value === 'number') {
+                // للتعامل مع تاريخ ميكروسوفت إكسيل التسلسلي
+                const date = new Date((value - 25569) * 86400 * 1000);
+                return date.toISOString().slice(0, 10);
+            }
+            return value;
+        }
+
+        // تنسيق الأرقام لتصبح مقروءة للعين الإدارية (ألوف وملايين)
+        function formatNumber(value) {
+            const num = parseFloat(value);
+            if (isNaN(num)) return '0.00';
+            return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        // توليد وتنزيل قالب ميزان المراجعة الذكي المتوافق مع IFRS مباشرة
+        function generateAndDownloadTemplate() {
+            // بيانات دليل حسابات المعايير الدولية (IFRS Chart of Accounts) الممثلة لـ 12 شهراً
+            const templateData = [
+                { "التاريخ (Date)": "2026-01-31", "كود الحساب (Account Code)": "11010", "اسم الحساب (Account Name)": "نقدية بالصندوق والبنوك - Cash & Banks", "الرصيد (Balance)": 150000 },
+                { "التاريخ (Date)": "2026-01-31", "كود الحساب (Account Code)": "11020", "اسم الحساب (Account Name)": "العملاء الذمم المدينة - Accounts Receivable", "الرصيد (Balance)": 85000 },
+                { "التاريخ (Date)": "2026-01-31", "كود الحساب (Account Code)": "11030", "اسم الحساب (Account Name)": "مخزون بضاعة - Inventory", "الرصيد (Balance)": 120000 },
+                { "التاريخ (Date)": "2026-01-31", "كود الحساب (Account Code)": "12010", "اسم الحساب (Account Name)": "أصول ثابتة - آلات ومعدات - PPE", "الرصيد (Balance)": 450000 },
+                { "التاريخ (Date)": "2026-01-31", "كود الحساب (Account Code)": "21010", "اسم الحساب (Account Name)": "الموردين والذمم الدائنة - Accounts Payable", "الرصيد (Balance)": -65000 },
+                { "التاريخ (Date)": "2026-01-31", "كود الحساب (Account Code)": "31010", "اسم الحساب (Account Name)": "رأس المال المدفوع - Paid-up Capital", "الرصيد (Balance)": -500000 },
+                { "التاريخ (Date)": "2026-01-31", "كود الحساب (Account Code)": "41010", "اسم الحساب (Account Name)": "إيرادات المبيعات - Revenue", "الرصيد (Balance)": -320000 },
+                { "التاريخ (Date)": "2026-01-31", "كود الحساب (Account Code)": "51010", "اسم الحساب (Account Name)": "تكلفة المبيعات - Cost of Sales", "الرصيد (Balance)": 180000 },
+                { "التاريخ (Date)": "2026-01-31", "كود الحساب (Account Code)": "51020", "اسم الحساب (Account Name)": "مصاريف إدارية وعمومية - SG&A Expenses", "الرصيد (Balance)": 50000 }
+            ];
+
+            // توليد شيت إكسيل باستخدام SheetJS
+            const worksheet = XLSX.utils.json_to_sheet(templateData);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Trial Balance IFRS");
+
+            // تنزيل الملف آلياً بجهاز المستخدم
+            XLSX.writeFile(workbook, "FinSight_IFRS_Template.xlsx");
+        }
+
+        // إدارة النوافذ المنبثقة للتأكيد ومسح البيانات
+        function showConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+        }
+
+        function clearFinancialData() {
+            localStorage.removeItem('financialData');
+            document.getElementById('statusBox').classList.remove('success');
+            document.getElementById('previewSection').style.display = 'none';
+            document.getElementById('btnClearData').style.display = 'none';
+            closeConfirmModal();
+            
+            // إعلام فوري للمستخدم
+            setTimeout(() => {
+                alert(currentLang === 'ar' ? 'تم تصفير المنصة بالكامل وحذف ذاكرة العمل المحفوظة بنجاح!' : 'Platform cleared and working data successfully deleted!');
+            }, 100);
+        }
+
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+</html>

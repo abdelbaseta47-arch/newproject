@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinSight - رفع ميزان المراجعة</title>
+    <title>FinSight - رفع وتوجيه ميزان المراجعة</title>
     <!-- استيراد الخطوط الاحترافية -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -60,7 +60,6 @@
             min-height: 100vh;
         }
 
-        /* */
         /* الشريط الجانبي (Sidebar) */
         .sidebar {
             position: fixed;
@@ -150,7 +149,6 @@
             opacity: 1;
         }
 
-        /* */
         /* محتوى الصفحة الرئيسي */
         .main-content {
             margin-inline-start: var(--sidebar-width);
@@ -222,7 +220,6 @@
             color: var(--text-title);
         }
 
-        /* */
         /* منطقة الخيارات والتحميل */
         .actions-wrapper {
             display: flex;
@@ -271,7 +268,6 @@
             transform: translateY(-2px);
         }
 
-        /* */
         /* لوحة سحب وإفلات الملفات */
         .dropzone-area {
             background-color: var(--bg-surface);
@@ -317,7 +313,6 @@
             cursor: pointer;
         }
 
-        /* */
         /* حالة الرفع وحالة البيانات */
         .status-box {
             background-color: var(--bg-surface);
@@ -360,7 +355,84 @@
             gap: 10px;
         }
 
-        /* */
+        /* شاشة توجيه الحسابات (Account Mapping Screen) */
+        .mapping-section {
+            display: none;
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 40px;
+        }
+
+        .mapping-title {
+            font-family: var(--font-title);
+            font-size: 22px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mapping-desc {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .mapping-table-wrapper {
+            max-height: 450px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 25px;
+        }
+
+        .select-mapping {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 8px 12px;
+            border-radius: 4px;
+            width: 100%;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-size: 14px;
+        }
+
+        .select-mapping:focus {
+            outline: none;
+            border-color: var(--text-title);
+        }
+
+        .btn-save-mapping {
+            background-color: var(--text-title);
+            color: var(--bg-main);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-weight: 700;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            margin-inline-start: auto;
+        }
+
+        .btn-save-mapping:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        body.light-mode .btn-save-mapping {
+            background-color: var(--text-title);
+            color: #ffffff;
+        }
+
         /* جدول استعراض البيانات المرفوعة */
         .preview-section {
             display: none;
@@ -410,7 +482,6 @@
             background-color: rgba(100, 255, 218, 0.02);
         }
 
-        /* */
         /* التنبيه المنبثق للتأكيد */
         .modal {
             position: fixed;
@@ -544,7 +615,6 @@
         </div>
     </nav>
 
-    <!-- -->
     <!-- المحتوى الرئيسي -->
     <main class="main-content">
         <!-- الشريط العلوي -->
@@ -566,7 +636,7 @@
             <!-- أزرار الإجراءات السريعة -->
             <div class="actions-wrapper">
                 <button class="btn-download" onclick="generateAndDownloadTemplate()">
-                    <i class="fa-solid fa-file-excel"></i> <span data-i18n="btnTemplate">تحميل قالب Excel الفارغ</span>
+                    <i class="fa-solid fa-file-excel"></i> <span data-i18n="btnTemplate">تحميل قالب Excel المرن</span>
                 </button>
                 <button class="btn-danger" id="btnClearData" onclick="showConfirmModal()" style="display: none;">
                     <i class="fa-solid fa-trash-can"></i> <span data-i18n="btnClear">حذف وتصفير المنصة</span>
@@ -594,11 +664,37 @@
                 </div>
             </div>
 
-            <!-- -->
-            <!-- قسم المعاينة للجدول المرفوع -->
+            <!-- شاشة توجيه الحسابات (Account Mapping Screen) -->
+            <div class="mapping-section" id="mappingSection">
+                <div class="mapping-title">
+                    <span style="font-weight: 700; color: var(--text-title);" data-i18n="mappingHeader">خطوة 2: توجيه وربط حساباتك بالمعايير الدولية (IFRS)</span>
+                    <span style="font-size: 14px; color: var(--text-muted);" id="mappingCount"></span>
+                </div>
+                <p class="mapping-desc" data-i18n="mappingSubtitle">لقد استخلصنا الحسابات الفريدة من ملفك بنجاح. يرجى توجيه كل حساب إلى التصنيف الصحيح لإنتاج القوائم المالية والتحليلات المقارنة فوراً.</p>
+                
+                <div class="mapping-table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 25%;" data-i18n="mapColCode">كود الحساب</th>
+                                <th style="width: 40%;" data-i18n="mapColName">اسم الحساب الخاص بك</th>
+                                <th style="width: 35%;" data-i18n="mapColClass">تصنيف المعايير الدولية (IFRS)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mappingTableBody">
+                            <!-- سيتم تعبئة الحسابات الفريدة هنا برمجياً -->
+                        </tbody>
+                    </table>
+                </div>
+                <button class="btn-save-mapping" onclick="saveAccountMapping()">
+                    <i class="fa-solid fa-floppy-disk"></i> <span data-i18n="btnSaveMapping">حفظ التوجيه وحقن البيانات بالمنصة</span>
+                </button>
+            </div>
+
+            <!-- قسم المعاينة للجدول المرفوع الموجه -->
             <div class="preview-section" id="previewSection">
                 <div class="preview-title">
-                    <span data-i18n="previewHeader">معاينة ميزان المراجعة المرفوع</span>
+                    <span data-i18n="previewHeader">معاينة ميزان المراجعة المرفوع والموجه</span>
                     <span style="font-size: 14px; color: var(--text-title);" id="rowCount"></span>
                 </div>
                 <div class="table-wrapper">
@@ -609,7 +705,7 @@
                             </tr>
                         </thead>
                         <tbody id="tableBody">
-                            <!-- سيتم تعبئة البيانات هنا -->
+                            <!-- سيتم تعبئة البيانات الموجهة بالكامل هنا -->
                         </tbody>
                     </table>
                 </div>
@@ -645,11 +741,15 @@
         </footer>
     </main>
 
-    <!-- -->
+    <!-- السيناريوهات والمنطق البرمجي لقراءة البيانات وحفظها سحابياً -->
     <script>
         // إعدادات اللغة والمظهر المتزامنة سحابياً عبر localStorage
         let isLightMode = localStorage.getItem('finSightTheme') === 'light';
         let currentLang = localStorage.getItem('finSightLang') || 'ar';
+
+        // تخزين البيانات المؤقتة والفريدة أثناء عملية المعالجة
+        let uploadedRawRows = [];
+        let uniqueAccountsList = [];
 
         const translations = {
             ar: {
@@ -661,11 +761,17 @@
                 themeLight: "الوضع الفاتح",
                 themeDark: "الوضع الداكن",
                 pageTitle: "إدارة ورفع <span>البيانات المالية</span>",
-                btnTemplate: "تحميل قالب Excel المرن (دليلي ثنائي)",
+                btnTemplate: "تحميل قالب Excel المرن (مبسط)",
                 btnClear: "حذف وتصفير المنصة",
                 dropTitle: "قم بسحب وإفلات ملف ميزان المراجعة هنا",
                 dropSubtitle: "أو اضغط لاختيار الملف من جهازك (يدعم صيغ .xlsx, .xls, .csv)",
                 statusSuccessTitle: "تم رفع ميزان المراجعة بنجاح واستخلاص البيانات!",
+                mappingHeader: "خطوة 2: ربط وتوجيه حساباتك بالمعايير الدولية (IFRS)",
+                mappingSubtitle: "استخلصنا حساباتك الفريدة بنجاح. يرجى توجيه كل حساب للتصنيف الصحيح لإنتاج القوائم والتحليلات فوراً.",
+                mapColCode: "كود الحساب",
+                mapColName: "اسم الحساب الخاص بك",
+                mapColClass: "تصنيف المعايير الدولية (IFRS)",
+                btnSaveMapping: "حفظ التوجيه وحقن البيانات بالمنصة",
                 previewHeader: "معاينة ميزان المراجعة المرفوع والموجه (IFRS)",
                 modalConfirmTitle: "تنبيه أمني هام!",
                 modalConfirmBody: "هل أنت متأكد من رغبتك في حذف كافة البيانات المالية المرفوعة وتصفير كافة تحليلات وقوائم المنصة؟ لا يمكن التراجع عن هذا الإجراء.",
@@ -682,12 +788,18 @@
                 themeLight: "Light Mode",
                 themeDark: "Dark Mode",
                 pageTitle: "Manage & Upload <span>Financial Data</span>",
-                btnTemplate: "Download Flexible Excel Template (2-Sheets)",
+                btnTemplate: "Download Flexible Excel Template (Simple)",
                 btnClear: "Clear & Reset Platform",
                 dropTitle: "Drag and drop your Trial Balance file here",
                 dropSubtitle: "Or click to select a file from your device (Supports .xlsx, .xls, .csv)",
                 statusSuccessTitle: "Trial Balance successfully uploaded and processed!",
-                previewHeader: "Uploaded Trial Balance Preview (IFRS)",
+                mappingHeader: "Step 2: Map Your Accounts to IFRS Standards",
+                mappingSubtitle: "We successfully extracted your unique accounts. Please map each account to its correct classification to produce statements instantly.",
+                mapColCode: "Account Code",
+                mapColName: "Your Account Name",
+                mapColClass: "IFRS Classification",
+                btnSaveMapping: "Save Mapping & Map Financial Data",
+                previewHeader: "Uploaded Trial Balance Preview (IFRS Mapped)",
                 modalConfirmTitle: "Important Security Alert!",
                 modalConfirmBody: "Are you sure you want to permanently delete all uploaded financial data and reset the entire platform? This action cannot be undone.",
                 modalConfirmBtn: "Yes, Reset Platform",
@@ -696,7 +808,25 @@
             }
         };
 
-        //        // دالة الانتقال الحقيقية بين الصفحات
+        // تصنيفات IFRS المحاسبية المعتمدة بالمنصة
+        const ifrsCategories = [
+            { id: "أصول غير متداولة - أصول ثابتة", nameAr: "أصول غير متداولة - أصول ثابتة (PPE)", nameEn: "Non-Current Assets - PPE" },
+            { id: "أصول متداولة - نقدية بالبنوك", nameAr: "أصول متداولة - نقدية بالبنوك والصناديق", nameEn: "Current Assets - Cash & Banks" },
+            { id: "أصول متداولة - عملاء", nameAr: "أصول متداولة - عملاء وذمم مدينة", nameEn: "Current Assets - Accounts Receivable" },
+            { id: "أصول متداولة - مخزون", nameAr: "أصول متداولة - مخزون بضاعة", nameEn: "Current Assets - Inventory" },
+            { id: "أصول متداولة - أخرى", nameAr: "أصول متداولة - أخرى وأرصدة مدينة", nameEn: "Current Assets - Other Current Assets" },
+            { id: "حقوق ملكية - رأس المال", nameAr: "حقوق ملكية - رأس المال المدفوع", nameEn: "Equity - Share Capital" },
+            { id: "حقوق ملكية - أرباح مبقاة", nameAr: "حقوق ملكية - أرباح مبقاة / خسائر مدورة", nameEn: "Equity - Retained Earnings" },
+            { id: "التزامات غير متداولة", nameAr: "التزامات غير متداولة (طويلة الأجل)", nameEn: "Non-Current Liabilities" },
+            { id: "التزامات متداولة - موردين", nameAr: "التزامات متداولة - موردين وذمم دائنة", nameEn: "Current Liabilities - Trade Payables" },
+            { id: "التزامات متداولة - أخرى", nameAr: "التزامات متداولة - مصاريف مستحقة وأخرى", nameEn: "Current Liabilities - Other Current Liabilities" },
+            { id: "إيرادات", nameAr: "إيرادات المبيعات والنشاط", nameEn: "Revenue" },
+            { id: "تكلفة المبيعات", nameAr: "تكلفة المبيعات والحصول على النشاط", nameEn: "Cost of Sales" },
+            { id: "مصاريف إدارية وعمومية", nameAr: "مصاريف إدارية وعمومية ومرتبات", nameEn: "SG&A Expenses" },
+            { id: "مصاريف تمويلية", nameAr: "مصاريف تمويلية وعمولات بنكية", nameEn: "Finance Costs" }
+        ];
+
+        // دالة الانتقال الحقيقية بين الصفحات
         function navigateTo(url) {
             if (!url) return;
             try {
@@ -776,13 +906,17 @@
             document.querySelector('#langToggle span').innerText = currentLang === 'ar' ? 'English' : 'العربية';
             updateTexts();
             
+            // تحديث محتوى شاشة التوجيه وجدول المعاينة باللغة الجديدة فورياً
+            if (uniqueAccountsList.length > 0) {
+                renderAccountMappingScreen();
+            }
             const rawData = localStorage.getItem('financialData');
             if (rawData) {
                 renderTable(JSON.parse(rawData));
             }
         }
 
-        //        // فحص وجود بيانات سابقة في ذاكرة المتصفح لعرضها مباشرة
+        // فحص وجود بيانات سابقة في ذاكرة المتصفح لعرضها مباشرة
         function checkExistingData() {
             const savedData = localStorage.getItem('financialData');
             if (savedData) {
@@ -818,41 +952,163 @@
             }
         });
 
-        // قراءة ومعالجة ملف الإكسيل ثنائي الشيتات ومطابقته ببيانات IFRS
+        // قراءة ومعالجة ملف الإكسيل ومطابقته ببيانات IFRS
         function processExcelFile(file) {
             const reader = new FileReader();
             reader.onload = function(e) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, {type: 'array'});
-                
-                // البحث الذكي عن شيت ميزان المراجعة (سواء بالعربي أو الإنجليزي)
-                const sheetNames = workbook.SheetNames;
-                const targetSheetName = sheetNames.find(name => 
-                    name.toLowerCase().includes('trial') || 
-                    name.toLowerCase().includes('balance') || 
-                    name.includes('ميزان') || 
-                    name.includes('مراجعة')
-                ) || sheetNames[0];
-
-                const worksheet = workbook.Sheets[targetSheetName];
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
                 
                 // تحويل الشيت إلى مصفوفة جيسون
                 const jsonData = XLSX.utils.sheet_to_json(worksheet);
                 
                 if (jsonData.length === 0) {
-                    showToast(currentLang === 'ar' ? 'الملف المرفوع فارغ أو لم نعثر على شيت ميزان المراجعة!' : 'Uploaded file is empty or Trial Balance sheet not found!');
+                    showToast(currentLang === 'ar' ? 'الملف المرفوع فارغ!' : 'Uploaded file is empty!');
                     return;
                 }
 
-                // حفظ البيانات في المتصفح
-                localStorage.setItem('financialData', JSON.stringify(jsonData));
+                uploadedRawRows = jsonData;
                 
-                // إظهار واجهة النجاح والجدول المعاين
-                showSuccessStatus(jsonData.length, file.name);
-                renderTable(jsonData);
-                document.getElementById('btnClearData').style.display = 'inline-flex';
+                // استخلاص الحسابات الفريدة بشكل فوري وديناميكي
+                extractUniqueAccounts(jsonData);
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        // استخلاص الحسابات الفريدة بالاعتماد على التوليد الذكي للأكواد والأسماء
+        function extractUniqueAccounts(data) {
+            const keys = Object.keys(data[0]);
+            const codeKey = keys.find(k => k.includes('كود') || k.toLowerCase().includes('code') || k.includes('رقم')) || keys[2];
+            const nameKey = keys.find(k => k.includes('اسم') || k.toLowerCase().includes('name')) || keys[3];
+
+            const uniqueMap = {};
+            data.forEach(row => {
+                const code = row[codeKey] || '';
+                const name = row[nameKey] || '';
+                if (code || name) {
+                    uniqueMap[code] = name;
+                }
+            });
+
+            uniqueAccountsList = Object.keys(uniqueMap).map(code => ({
+                code: code,
+                name: uniqueMap[code]
+            }));
+
+            // الانتقال الفوري لخطوة التوجيه (Step 2)
+            showSuccessStatus(data.length);
+            renderAccountMappingScreen();
+        }
+
+        // رسم شاشة توجيه الحسابات (Account Mapping Screen)
+        function renderAccountMappingScreen() {
+            const mappingSection = document.getElementById('mappingSection');
+            const mappingTableBody = document.getElementById('mappingTableBody');
+            const mappingCountText = document.getElementById('mappingCount');
+
+            mappingTableBody.innerHTML = '';
+            mappingCountText.innerText = currentLang === 'ar' 
+                ? `إجمالي الحسابات المطلوب توجيهها: ${uniqueAccountsList.length}`
+                : `Total accounts to map: ${uniqueAccountsList.length}`;
+
+            // سحب التوجيهات المحفوظة مسبقاً (إن وجدت) لتبسيط العمل على المحاسب
+            const savedMappings = JSON.parse(localStorage.getItem('accountMappings') || '{}');
+
+            uniqueAccountsList.forEach(acc => {
+                const tr = document.createElement('tr');
+
+                const tdCode = document.createElement('td');
+                tdCode.innerText = acc.code;
+                tdCode.style.fontWeight = 'bold';
+                
+                const tdName = document.createElement('td');
+                tdName.innerText = acc.name;
+
+                const tdClass = document.createElement('td');
+                const select = document.createElement('select');
+                select.className = 'select-mapping';
+                select.id = `map_${acc.code}`;
+
+                // إضافة خيار افتراضي فارغ لإجبار التوجيه الصحيح
+                const defOption = document.createElement('option');
+                defOption.value = '';
+                defOption.innerText = currentLang === 'ar' ? '-- اختر تصنيف المعايير الدولية --' : '-- Choose IFRS Classification --';
+                select.appendChild(defOption);
+
+                ifrsCategories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.innerText = currentLang === 'ar' ? cat.nameAr : cat.nameEn;
+                    select.appendChild(option);
+                });
+
+                // تطبيق التوجيه القديم تلقائياً إذا وجد في قاعدة البيانات لزيادة سرعة وسهولة الرفع
+                if (savedMappings[acc.code]) {
+                    select.value = savedMappings[acc.code];
+                }
+
+                tdClass.appendChild(select);
+
+                tr.appendChild(tdCode);
+                tr.appendChild(tdName);
+                tr.appendChild(tdClass);
+
+                mappingTableBody.appendChild(tr);
+            });
+
+            // إظهار شاشة الربط وإخفاء معاينة البيانات النهائية حتى يكتمل التوجيه
+            mappingSection.style.display = 'block';
+            document.getElementById('previewSection').style.display = 'none';
+        }
+
+        // حفظ التوجيه المحاسبي وحقن البيانات آلياً بالمنصة
+        function saveAccountMapping() {
+            const mappings = {};
+            let allMapped = true;
+
+            uniqueAccountsList.forEach(acc => {
+                const select = document.getElementById(`map_${acc.code}`);
+                const value = select.value;
+                if (!value) {
+                    allMapped = false;
+                }
+                mappings[acc.code] = value;
+            });
+
+            if (!allMapped) {
+                showToast(currentLang === 'ar' 
+                    ? 'الرجاء اختيار تصنيف لجميع الحسابات لضمان دقة القوائم المالية والتحليلات!' 
+                    : 'Please select IFRS classifications for all accounts to guarantee statement accuracy!');
+                return;
+            }
+
+            // حفظ التوجيهات آلياً في الذاكرة
+            localStorage.setItem('accountMappings', JSON.stringify(mappings));
+
+            // دمج وحقن البيانات: دمج التوجيهات بملف ميزان المراجعة لتبسيط قراءتها بباقي الصفحات
+            const keys = Object.keys(uploadedRawRows[0]);
+            const codeKey = keys.find(k => k.includes('كود') || k.toLowerCase().includes('code') || k.includes('رقم')) || keys[2];
+
+            const mappedData = uploadedRawRows.map(row => {
+                const code = row[codeKey] || '';
+                const classification = mappings[code] || '';
+                return {
+                    ...row,
+                    "تصنيف المعايير (IFRS)": classification
+                };
+            });
+
+            // حفظ ميزان المراجعة المدمج الموجه بالكامل بالمنصة
+            localStorage.setItem('financialData', JSON.stringify(mappedData));
+
+            showToast(currentLang === 'ar' ? 'تم حفظ التوجيه وربط البيانات بنجاح!' : 'Account mapping and financial data successfully saved!');
+            
+            // تفعيل وعرض معاينة الجدول والبيانات النهائية وتفعيل زر مسح وتصفير المنصة
+            renderTable(mappedData);
+            document.getElementById('btnClearData').style.display = 'inline-flex';
+            document.getElementById('mappingSection').style.display = 'none';
         }
 
         // إظهار صندوق النجاح
@@ -862,13 +1118,13 @@
             statusBox.classList.add('success');
             
             if (currentLang === 'ar') {
-                statusDetails.innerText = `تم استيراد ${rowsCount} سجلاً بنجاح من الملف ${filename ? `'${filename}'` : ''}. تم دمج وتوجيه الأرقام آلياً.`;
+                statusDetails.innerText = `تم استيراد ${rowsCount} سجلاً بنجاح من الملف ${filename ? `'${filename}'` : ''}. تم استخلاص حسابات ميزان المراجعة بنجاح.`;
             } else {
-                statusDetails.innerText = `Successfully imported ${rowsCount} records from the file ${filename ? `'${filename}'` : ''}. Data mapped automatically.`;
+                statusDetails.innerText = `Successfully imported ${rowsCount} records from the file ${filename ? `'${filename}'` : ''}. Unique accounts processed.`;
             }
         }
 
-        //        // رسم جدول المعاينة ديناميكياً ليدعم الأعمدة المحاسبية المخصصة الجديدة
+        // رسم جدول المعاينة ديناميكياً ليدعم الأعمدة المحاسبية المخصصة الجديدة
         function renderTable(data) {
             const previewSection = document.getElementById('previewSection');
             const headerRow = document.getElementById('tableHeader');
@@ -962,16 +1218,15 @@
             return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
-        //        // توليد وتنزيل قالب ميزان المراجعة الذكي ثنائي الشيتات المتوافق مع IFRS
+        // توليد وتنزيل قالب ميزان المراجعة الذكي المفرغ والمناسب لتوجيه المنصة
         function generateAndDownloadTemplate() {
-            // الشيت الأول: هيكل ميزان المراجعة الفارغ والحر (أمثلة مرنة)
+            // شيت ميزان المراجعة الفارغ والحر والمبسط كما طلب المستخدم بدقة
             const trialBalanceData = [
                 { 
                     "السنة (Year)": 2026, 
                     "الشهر (Month)": 1, 
                     "رقم الحساب (Account Code)": "1001", 
                     "اسم الحساب (Account Name)": "النقدية لدى الصندوق والبنوك", 
-                    "تصنيف الحساب (Classification)": "أصول متداولة - نقدية بالبنوك", 
                     "المدين (Debit)": 280000, 
                     "الدائن (Credit)": 0 
                 },
@@ -980,7 +1235,6 @@
                     "الشهر (Month)": 1, 
                     "رقم الحساب (Account Code)": "1002", 
                     "اسم الحساب (Account Name)": "حسابات الذمم التجارية المدينة", 
-                    "تصنيف الحساب (Classification)": "أصول متداولة - عملاء", 
                     "المدين (Debit)": 120000, 
                     "الدائن (Credit)": 0 
                 },
@@ -989,7 +1243,6 @@
                     "الشهر (Month)": 1, 
                     "رقم الحساب (Account Code)": "1003", 
                     "اسم الحساب (Account Name)": "مخزون بضاعة المستودع الرئيسي", 
-                    "تصنيف الحساب (Classification)": "أصول متداولة - مخزون", 
                     "المدين (Debit)": 160000, 
                     "الدائن (Credit)": 0 
                 },
@@ -998,7 +1251,6 @@
                     "الشهر (Month)": 1, 
                     "رقم الحساب (Account Code)": "2001", 
                     "اسم الحساب (Account Name)": "شركة الموردين للتوريدات والمقاولات", 
-                    "تصنيف الحساب (Classification)": "التزامات متداولة - موردين", 
                     "المدين (Debit)": 0, 
                     "الدائن (Credit)": 95000 
                 },
@@ -1007,7 +1259,6 @@
                     "الشهر (Month)": 1, 
                     "رقم الحساب (Account Code)": "3001", 
                     "اسم الحساب (Account Name)": "رأس المال المكتتب به والمدفوع", 
-                    "تصنيف الحساب (Classification)": "حقوق ملكية - رأس المال", 
                     "المدين (Debit)": 0, 
                     "الدائن (Credit)": 400000 
                 },
@@ -1016,7 +1267,6 @@
                     "الشهر (Month)": 1, 
                     "رقم الحساب (Account Code)": "4001", 
                     "اسم الحساب (Account Name)": "إيرادات المبيعات والخدمات الاستشارية", 
-                    "تصنيف الحساب (Classification)": "إيرادات", 
                     "المدين (Debit)": 0, 
                     "الدائن (Credit)": 190000 
                 },
@@ -1025,7 +1275,6 @@
                     "الشهر (Month)": 1, 
                     "رقم الحساب (Account Code)": "5001", 
                     "اسم الحساب (Account Name)": "تكاليف ومصاريف الحصول على المبيعات", 
-                    "تصنيف الحساب (Classification)": "تكلفة المبيعات", 
                     "المدين (Debit)": 110000, 
                     "الدائن (Credit)": 0 
                 },
@@ -1034,98 +1283,26 @@
                     "الشهر (Month)": 1, 
                     "رقم الحساب (Account Code)": "5002", 
                     "اسم الحساب (Account Name)": "مصاريف إدارية وعمومية ومرتبات", 
-                    "تصنيف الحساب (Classification)": "مصاريف إدارية وعمومية", 
                     "المدين (Debit)": 15000, 
                     "الدائن (Credit)": 0 
-                }
-            ];
-
-            // الشيت الثاني: الدليل التوجيهي الذكي والحي لمعايير التقارير المالية الدولية
-            const mappingGuideData = [
-                { 
-                    "مجموعة الحسابات (Group)": "أصول غير متداولة (Non-Current Assets)", 
-                    "التصنيف المعتمد بالمنصة (IFRS Classification)": "أصول غير متداولة - أصول ثابتة", 
-                    "الوصف والأمثلة (Description & Examples)": "العقارات، المباني، الآلات، المعدات، وسائل النقل والسيارات" 
-                },
-                { 
-                    "مجموعة الحسابات (Group)": "أصول متداولة (Current Assets)", 
-                    "التصنيف المعتمد بالمنصة (IFRS Classification)": "أصول متداولة - نقدية بالبنوك", 
-                    "الوصف والأمثلة (Description & Examples)": "حسابات البنوك الجارية والودائع النقدية، والصناديق والعهود" 
-                },
-                { 
-                    "مجموعة الحسابات (Group)": "أصول متداولة (Current Assets)", 
-                    "التصنيف المعتمد بالمنصة (IFRS Classification)": "أصول متداولة - عملاء", 
-                    "الوصف والأمثلة (Description & Examples)": "ذمم العملاء والمدينين التجاريين، وأوراق القبض وأرصدة مدينة أخرى" 
-                },
-                { 
-                    "مجموعة الحسابات (Group)": "أصول متداولة (Current Assets)", 
-                    "التصنيف المعتمد بالمنصة (IFRS Classification)": "أصول متداولة - مخزون", 
-                    "الوصف والأمثلة (Description & Examples)": "مخزون بضاعة أخر المدة، الخامات والمواد، قطع غيار ومستلزمات" 
-                },
-                { 
-                    "مجموعة الحسابات (Group)": "حقوق الملكية (Equity)", 
-                    "التصنيف المعتمد بالمنصة (IFRS Classification)": "حقوق ملكية - رأس المال", 
-                    "الوصف والأمثلة (Description & Examples)": "رأس مال المنشأة المدفوع بالكامل من الشركاء أو المساهمين" 
-                },
-                { 
-                    "مجموعة الحسابات (Group)": "حقوق الملكية (Equity)", 
-                    "التصنيف المعتمد بالمنصة (IFRS Classification)": "حقوق ملكية - أرباح مبقاة", 
-                    "الوصف والأمثلة (Description & Examples)": "الأرباح المدورة من السنوات السابقة أو الخسائر المتراكمة" 
-                },
-                { 
-                    "مجموعة الحسابات (Group)": "التزامات غير متداولة (Non-Current Liabilities)", 
-                    "التصنيف المعتمد بالمنصة (IFRS Classification)": "التزامات غير متداولة", 
-                    "الوصف والأمثلة (Description & Examples)": "القروض والتسهيلات الائتمانية طويلة الأجل، مخصص مكافأة نهاية الخدمة" 
-                },
-                { 
-                    "مجموعة الحسابات (Group)": "التزامات متداولة (Current Liabilities)", 
-                    "التصنيف المعتمد بالمنصة (IFRS Classification)": "التزامات متداولة - موردين", 
-                    "الوصف والأمثلة (Description & Examples)": "مستحقات الموردين والذمم التجارية الدائنة وأوراق الدفع" 
-                },
-                { 
-                    "مجموعة الحسابات (Group)": "التزامات متداولة (Current Liabilities)", 
-                    "التصنيف المعتمد بالمنصة (IFRS Classification)": "التزامات متداولة - أخرى", 
-                    "الوصف والأمثلة (Description & Examples)": "المصاريف المستحقة (إيجار، رواتب)، الضرائب المستحقة، أرصدة دائنة أخرى" 
-                },
-                { 
-                    "مجموعة الحسابات (Group)": "قائمة الأرباح أو الخسائر (Profit & Loss)", 
-                    "التصنيف المعتمد بالمنصة (IFRS Classification)": "إيرادات", 
-                    "الوصف والأمثلة (Description & Examples)": "مبيعات البضائع، تقديم الخدمات، الاستشارات، إيرادات النشاط الأساسية" 
-                },
-                { 
-                    "مجموعة الحسابات (Group)": "قائمة الأرباح أو الخسائر (Profit & Loss)", 
-                    "التصنيف المعتمد بالمنصة (IFRS Classification)": "تكلفة المبيعات", 
-                    "الوصف والأمثلة (Description & Examples)": "تكلفة البضاعة المباعة، المشتريات المباشرة، مصاريف الشحن والإنتاج" 
-                },
-                { 
-                    "مجموعة الحسابات (Group)": "قائمة الأرباح أو الخسائر (Profit & Loss)", 
-                    "التصنيف المعتمد بالمنصة (IFRS Classification)": "مصاريف إدارية وعمومية", 
-                    "الوصف والأمثلة (Description & Examples)": "رواتب الإدارة، الإيجارات، الفواتير والمنافع، اشتراكات البرامج" 
-                },
-                { 
-                    "مجموعة الحسابات (Group)": "قائمة الأرباح أو الخسائر (Profit & Loss)", 
-                    "التصنيف المعتمد بالمنصة (IFRS Classification)": "مصاريف تمويلية", 
-                    "الوصف والأمثلة (Description & Examples)": "عمولات البنوك، فوائد القروض، الفروق السلبية للعملة" 
                 }
             ];
 
             // بناء كتاب العمل (Workbook) الجديد بإستخدام SheetJS
             const workbook = XLSX.utils.book_new();
 
-            // تحويل البيانات لشيتات مستقلة
+            // تحويل البيانات لشيت مستقل وبسيط جداً يسهل على المحاسب ملؤه بحرية تامة
             const wsTrialBalance = XLSX.utils.json_to_sheet(trialBalanceData);
-            const wsMappingGuide = XLSX.utils.json_to_sheet(mappingGuideData);
 
-            // دمج الشيتات وتسميتها
+            // دمج وتسمية الشيت
             XLSX.utils.book_append_sheet(workbook, wsTrialBalance, "Trial_Balance");
-            XLSX.utils.book_append_sheet(workbook, wsMappingGuide, "IFRS_Mapping_Guide");
 
             // تنزيل الملف بشكل آلي وفوري على جهاز المستخدم
-            XLSX.writeFile(workbook, "FinSight_Flexible_IFRS_Template.xlsx");
-            showToast(currentLang === 'ar' ? 'تم تنزيل قالب الإكسيل ثنائي الشيتات بنجاح!' : 'Flexible Excel template successfully downloaded!');
+            XLSX.writeFile(workbook, "FinSight_Flexible_Simple_Template.xlsx");
+            showToast(currentLang === 'ar' ? 'تم تنزيل قالب الإكسيل المبسط بنجاح!' : 'Flexible simple template successfully downloaded!');
         }
 
-        //        // إدارة النوافذ المنبثقة للتأكيد ومسح البيانات
+        // إدارة النوافذ المنبثقة للتأكيد ومسح البيانات
         function showConfirmModal() {
             document.getElementById('confirmModal').style.display = 'flex';
         }
@@ -1136,8 +1313,10 @@
 
         function clearFinancialData() {
             localStorage.removeItem('financialData');
+            localStorage.removeItem('accountMappings'); // حذف التوجيهات أيضاً لتصفير حقيقي
             document.getElementById('statusBox').classList.remove('success');
             document.getElementById('previewSection').style.display = 'none';
+            document.getElementById('mappingSection').style.display = 'none';
             document.getElementById('btnClearData').style.display = 'none';
             closeConfirmModal();
             

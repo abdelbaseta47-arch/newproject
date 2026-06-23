@@ -3,1329 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FinSight - رفع وتوجيه ميزان المراجعة</title>
-    <!-- استيراد الخطوط الاحترافية -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- مكتبة الأيقونات الشهيرة -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- مكتبة قراءة وتوليد ملفات الإكسيل SheetJS -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    
+    <title>رفع ميزان المراجعة</title>
+    <!-- تضمين مكتبة SheetJS لقراءة ملفات الإكسيل -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
-        /* إعدادات المتغيرات للوضع الداكن (الافتراضي) */
-        :root {
-            --bg-main: #020c1b;
-            --bg-surface: #0a192f;
-            --bg-sidebar: #112240;
-            --text-title: #64ffda;
-            --text-main: #e6f1ff;
-            --text-muted: #8892b0;
-            --accent-gold: #ffd700;
-            --border-color: #233554;
-            --danger-color: #ff5f56;
-            --danger-hover: #e04f46;
-            --success-color: #27c93f;
-            --font-main: 'Tajawal', sans-serif;
-            --font-title: 'Cairo', sans-serif;
-            --sidebar-width: 70px;
-            --sidebar-width-expanded: 260px;
-        }
-
-        /* متغيرات الوضع الفاتح */
-        body.light-mode {
-            --bg-main: #f3f4f6;
-            --bg-surface: #ffffff;
-            --bg-sidebar: #ffffff;
-            --text-title: #0052cc;
-            --text-main: #111827;
-            --text-muted: #4b5563;
-            --accent-gold: #d97706;
-            --border-color: #e5e7eb;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
-        }
-
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            font-family: var(--font-main);
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* الشريط الجانبي (Sidebar) */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            inset-inline-start: 0;
-            width: var(--sidebar-width);
-            height: 100vh;
-            background-color: var(--bg-sidebar);
-            border-inline-end: 1px solid var(--border-color);
-            z-index: 1000;
-            overflow-x: hidden;
-            transition: width 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            padding-top: 20px;
-        }
-
-        .sidebar:hover {
-            width: var(--sidebar-width-expanded);
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            margin-bottom: 40px;
-            white-space: nowrap;
-        }
-
-        .logo-icon {
-            font-size: 28px;
-            color: var(--accent-gold);
-            min-width: 30px;
-            text-align: center;
-        }
-
-        .logo-text {
-            font-family: var(--font-title);
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-title);
-            margin-inline-start: 15px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .sidebar:hover .logo-text {
-            opacity: 1;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            cursor: pointer;
-            white-space: nowrap;
-            color: var(--text-muted);
-            transition: all 0.2s;
-            border-inline-end: 4px solid transparent;
-        }
-
-        .nav-item:hover, .nav-item.active {
-            background-color: rgba(100, 255, 218, 0.1);
-            color: var(--text-title);
-            border-inline-end: 4px solid var(--text-title);
-        }
-
-        body.light-mode .nav-item:hover, body.light-mode .nav-item.active {
-            background-color: rgba(0, 82, 204, 0.1);
-        }
-
-        .nav-icon {
-            font-size: 22px;
-            min-width: 30px;
-            text-align: center;
-        }
-
-        .nav-text {
-            font-size: 16px;
-            font-weight: 500;
-            margin-inline-start: 15px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .sidebar:hover .nav-text {
-            opacity: 1;
-        }
-
-        /* محتوى الصفحة الرئيسي */
-        .main-content {
-            margin-inline-start: var(--sidebar-width);
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            transition: margin-inline-start 0.3s ease;
-        }
-
-        /* الشريط العلوي */
-        .top-bar {
-            height: 60px;
-            background-color: var(--bg-surface);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            padding: 0 30px;
-            gap: 20px;
-        }
-
-        .action-btn {
-            background: none;
-            border: 1px solid var(--border-color);
-            color: var(--text-muted);
-            padding: 8px 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-family: var(--font-main);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
-        }
-
-        .action-btn:hover {
-            color: var(--text-title);
-            border-color: var(--text-title);
-        }
-
-        /* حاوية الأدوات والرفع */
-        .upload-container {
-            padding: 40px;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-            flex-grow: 1;
-        }
-
-        .page-header {
-            margin-bottom: 30px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .page-title {
-            font-family: var(--font-title);
-            font-size: 32px;
-            color: var(--text-main);
-        }
-
-        .page-title span {
-            color: var(--text-title);
-        }
-
-        /* منطقة الخيارات والتحميل */
-        .actions-wrapper {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        .btn-download {
-            background-color: transparent;
-            border: 1px solid var(--accent-gold);
-            color: var(--accent-gold);
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-family: var(--font-main);
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s;
-        }
-
-        .btn-download:hover {
-            background-color: rgba(255, 215, 0, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background-color: transparent;
-            border: 1px solid var(--danger-color);
-            color: var(--danger-color);
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-family: var(--font-main);
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s;
-        }
-
-        .btn-danger:hover {
-            background-color: rgba(255, 95, 86, 0.1);
-            transform: translateY(-2px);
-        }
-
-        /* لوحة سحب وإفلات الملفات */
-        .dropzone-area {
-            background-color: var(--bg-surface);
-            border: 2px dashed var(--border-color);
-            border-radius: 8px;
-            padding: 50px 30px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-bottom: 40px;
-            position: relative;
-        }
-
-        .dropzone-area:hover, .dropzone-area.dragover {
-            border-color: var(--text-title);
-            background-color: rgba(100, 255, 218, 0.02);
-        }
-
-        .dropzone-icon {
-            font-size: 50px;
-            color: var(--text-title);
-            margin-bottom: 15px;
-        }
-
-        .dropzone-text h3 {
-            font-family: var(--font-title);
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-
-        .dropzone-text p {
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        #fileInput {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        /* حالة الرفع وحالة البيانات */
-        .status-box {
-            background-color: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 20px;
-            margin-bottom: 30px;
-            display: none;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .status-box.success {
-            border-color: var(--success-color);
-            display: flex;
-        }
-
-        .status-box.success i {
-            color: var(--success-color);
-            font-size: 24px;
-        }
-
-        /* تنبيهات مخصصة (تغني عن الـ Alert) */
-        .toast-notification {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--bg-surface);
-            border: 1px solid var(--text-title);
-            color: var(--text-main);
-            padding: 15px 25px;
-            border-radius: 8px;
-            z-index: 9999;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            font-family: var(--font-main);
-            font-weight: bold;
-            display: none;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* شاشة توجيه الحسابات (Account Mapping Screen) */
-        .mapping-section {
-            display: none;
-            background-color: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 25px;
-            margin-bottom: 40px;
-        }
-
-        .mapping-title {
-            font-family: var(--font-title);
-            font-size: 22px;
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .mapping-desc {
-            color: var(--text-muted);
-            font-size: 14px;
-            margin-bottom: 25px;
-            line-height: 1.6;
-        }
-
-        .mapping-table-wrapper {
-            max-height: 450px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            margin-bottom: 25px;
-        }
-
-        .select-mapping {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            padding: 8px 12px;
-            border-radius: 4px;
-            width: 100%;
-            cursor: pointer;
-            font-family: var(--font-main);
-            font-size: 14px;
-        }
-
-        .select-mapping:focus {
-            outline: none;
-            border-color: var(--text-title);
-        }
-
-        .btn-save-mapping {
-            background-color: var(--text-title);
-            color: var(--bg-main);
-            border: none;
-            padding: 12px 30px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-family: var(--font-main);
-            font-weight: 700;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s;
-            margin-inline-start: auto;
-        }
-
-        .btn-save-mapping:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-        }
-
-        body.light-mode .btn-save-mapping {
-            background-color: var(--text-title);
-            color: #ffffff;
-        }
-
-        /* جدول استعراض البيانات المرفوعة */
-        .preview-section {
-            display: none;
-            background-color: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 25px;
-            margin-bottom: 40px;
-        }
-
-        .preview-title {
-            font-family: var(--font-title);
-            font-size: 22px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-            max-height: 400px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: right;
-        }
-
-        th, td {
-            padding: 12px 15px;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 15px;
-        }
-
-        th {
-            background-color: var(--bg-sidebar);
-            color: var(--text-title);
-            font-family: var(--font-title);
-            font-weight: 600;
-            position: sticky;
-            top: 0;
-        }
-
-        tr:hover {
-            background-color: rgba(100, 255, 218, 0.02);
-        }
-
-        /* التنبيه المنبثق للتأكيد */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.6);
-            backdrop-filter: blur(5px);
-            z-index: 2000;
-            display: none;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-card {
-            background-color: var(--bg-surface);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 30px;
-            max-width: 450px;
-            width: 90%;
-            text-align: center;
-        }
-
-        .modal-card h3 {
-            font-family: var(--font-title);
-            font-size: 22px;
-            margin-bottom: 15px;
-            color: var(--danger-color);
-        }
-
-        .modal-card p {
-            color: var(--text-muted);
-            font-size: 16px;
-            margin-bottom: 25px;
-        }
-
-        .modal-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-
-        .btn-modal-confirm {
-            background-color: var(--danger-color);
-            color: #ffffff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .btn-modal-cancel {
-            background-color: var(--border-color);
-            color: var(--text-main);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        /* التذييل */
-        footer {
-            background-color: var(--bg-surface);
-            border-top: 1px solid var(--border-color);
-            padding: 25px 40px;
-            text-align: center;
-            font-size: 14px;
-            color: var(--text-muted);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-top: auto;
-        }
-
-        .developer-name {
-            color: var(--accent-gold);
-            font-weight: bold;
-        }
-
-        .social-link {
-            color: #1877F2;
-            font-size: 20px;
-            margin-inline-start: 10px;
-            text-decoration: none;
-            transition: transform 0.3s;
-            display: inline-block;
-            vertical-align: middle;
-        }
-
-        .social-link:hover {
-            transform: scale(1.1);
-        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f4f7f6; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .drop-zone { border: 2px dashed #007bff; border-radius: 10px; padding: 40px; text-align: center; cursor: pointer; background-color: #f8f9fa; transition: background 0.3s; }
+        .drop-zone.dragover { background-color: #e2e6ea; border-color: #0056b3; }
+        .status-message { margin-top: 20px; padding: 15px; border-radius: 5px; font-weight: bold; display: none; }
+        .status-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .mapping-section { margin-top: 30px; display: none; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        th, td { padding: 12px; border: 1px solid #ddd; text-align: right; }
+        th { background-color: #007bff; color: white; }
+        select { padding: 8px; width: 100%; border-radius: 4px; border: 1px solid #ccc; }
+        .btn-save { background-color: #28a745; color: white; border: none; padding: 10px 20px; font-size: 16px; border-radius: 5px; cursor: pointer; margin-top: 20px; width: 100%; }
+        .btn-save:hover { background-color: #218838; }
     </style>
 </head>
 <body>
 
-    <!-- الشريط الجانبي -->
-    <nav class="sidebar" id="sidebar">
-        <div class="logo-container">
-            <i class="fa-solid fa-chart-pie logo-icon"></i>
-            <span class="logo-text">FinSight</span>
-        </div>
+<div class="container">
+    <h2>رفع ميزان المراجعة</h2>
+    <p>قم بسحب وإفلات ملف الإكسيل هنا أو اضغط لاختيار الملف.</p>
 
-        <div class="nav-item" onclick="navigateTo('index.html')">
-            <i class="fa-solid fa-house nav-icon"></i>
-            <span class="nav-text" data-i18n="navHome">الرئيسية</span>
-        </div>
-        
-        <div class="nav-item active" onclick="navigateTo('upload.html')">
-            <i class="fa-solid fa-cloud-arrow-up nav-icon"></i>
-            <span class="nav-text" data-i18n="navUpload">رفع ميزان المراجعة</span>
-        </div>
+    <!-- منطقة السحب والإفلات -->
+    <div class="drop-zone" id="dropZone">
+        اسحب وأفلت ملف الإكسيل هنا<br>أو اضغط للاختيار
+        <input type="file" id="fileInput" accept=".xlsx, .xls" style="display: none;">
+    </div>
 
-        <div class="nav-item" onclick="navigateTo('statements.html')">
-            <i class="fa-solid fa-file-invoice-dollar nav-icon"></i>
-            <span class="nav-text" data-i18n="navStatements">القوائم المالية</span>
-        </div>
+    <!-- رسالة حالة الميزان -->
+    <div id="statusMessage" class="status-message"></div>
 
-        <div class="nav-item" onclick="navigateTo('analysis.html')">
-            <i class="fa-solid fa-chart-line nav-icon"></i>
-            <span class="nav-text" data-i18n="navAnalysis">التحليلات والمقارنات</span>
-        </div>
+    <!-- قسم توجيه الحسابات (مخفي افتراضياً) -->
+    <div id="mappingSection" class="mapping-section">
+        <h3>توجيه الحسابات (Account Mapping)</h3>
+        <p>قم باختيار التصنيف المناسب لكل حساب:</p>
+        <table id="mappingTable">
+            <thead>
+                <tr>
+                    <th>كود الحساب</th>
+                    <th>اسم الحساب</th>
+                    <th>الرصيد</th>
+                    <th>تصنيف IFRS</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- سيتم حقن الحسابات هنا برمجياً -->
+            </tbody>
+        </table>
+        <button class="btn-save" onclick="saveMapping()">حفظ التوجيه والانتقال</button>
+    </div>
+</div>
 
-        <div class="nav-item" onclick="navigateTo('ai.html')">
-            <i class="fa-solid fa-robot nav-icon"></i>
-            <span class="nav-text" data-i18n="navAi">المساعد الذكي</span>
-        </div>
-    </nav>
+<script>
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const statusMessage = document.getElementById('statusMessage');
+    const mappingSection = document.getElementById('mappingSection');
+    const mappingTableBody = document.querySelector('#mappingTable tbody');
 
-    <!-- المحتوى الرئيسي -->
-    <main class="main-content">
-        <!-- الشريط العلوي -->
-        <div class="top-bar">
-            <button class="action-btn" id="langToggle" onclick="toggleLanguage()">
-                <i class="fa-solid fa-globe"></i> <span>English</span>
-            </button>
-            <button class="action-btn" id="themeToggle" onclick="toggleTheme()">
-                <i class="fa-solid fa-sun"></i> <span id="themeText" data-i18n="themeLight">الوضع الفاتح</span>
-            </button>
-        </div>
+    // تصنيفات IFRS المقترحة
+    const ifrsCategories = [
+        "اختر التصنيف...",
+        "أصول غير متداولة (Non-Current Assets)",
+        "أصول متداولة (Current Assets)",
+        "التزامات غير متداولة (Non-Current Liabilities)",
+        "التزامات متداولة (Current Liabilities)",
+        "حقوق الملكية (Equity)",
+        "إيرادات (Revenues)",
+        "تكلفة المبيعات (Cost of Sales)",
+        "مصروفات تشغيلية (Operating Expenses)"
+    ];
 
-        <!-- مساحة الرفع -->
-        <div class="upload-container">
-            <div class="page-header">
-                <h1 class="page-title" data-i18n="pageTitle">إدارة ورفع <span>البيانات المالية</span></h1>
-            </div>
+    // تفعيل النقر على منطقة السحب
+    dropZone.addEventListener('click', () => fileInput.click());
 
-            <!-- أزرار الإجراءات السريعة -->
-            <div class="actions-wrapper">
-                <button class="btn-download" onclick="generateAndDownloadTemplate()">
-                    <i class="fa-solid fa-file-excel"></i> <span data-i18n="btnTemplate">تحميل قالب Excel المرن</span>
-                </button>
-                <button class="btn-danger" id="btnClearData" onclick="showConfirmModal()" style="display: none;">
-                    <i class="fa-solid fa-trash-can"></i> <span data-i18n="btnClear">حذف وتصفير المنصة</span>
-                </button>
-            </div>
+    // تأثيرات السحب والإفلات
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
 
-            <!-- صندوق السحب والإفلات المباشر للـ Excel -->
-            <div class="dropzone-area" id="dropzone">
-                <div class="dropzone-icon">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                </div>
-                <div class="dropzone-text">
-                    <h3 data-i18n="dropTitle">قم بسحب وإفلات ملف ميزان المراجعة هنا</h3>
-                    <p data-i18n="dropSubtitle">أو اضغط لاختيار الملف من جهازك (يدعم صيغ .xlsx, .xls, .csv)</p>
-                </div>
-                <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" onchange="handleFileSelect(event)">
-            </div>
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
 
-            <!-- صندوق حالة الرفع الناجحة -->
-            <div class="status-box" id="statusBox">
-                <i class="fa-solid fa-circle-check"></i>
-                <div>
-                    <h4 style="font-weight: 700; margin-bottom: 4px;" data-i18n="statusSuccessTitle">تم رفع ميزان المراجعة بنجاح!</h4>
-                    <p style="font-size: 14px; color: var(--text-muted);" id="statusDetails"></p>
-                </div>
-            </div>
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            handleFile(e.dataTransfer.files[0]);
+        }
+    });
 
-            <!-- شاشة توجيه الحسابات (Account Mapping Screen) -->
-            <div class="mapping-section" id="mappingSection">
-                <div class="mapping-title">
-                    <span style="font-weight: 700; color: var(--text-title);" data-i18n="mappingHeader">خطوة 2: توجيه وربط حساباتك بالمعايير الدولية (IFRS)</span>
-                    <span style="font-size: 14px; color: var(--text-muted);" id="mappingCount"></span>
-                </div>
-                <p class="mapping-desc" data-i18n="mappingSubtitle">لقد استخلصنا الحسابات الفريدة من ملفك بنجاح. يرجى توجيه كل حساب إلى التصنيف الصحيح لإنتاج القوائم المالية والتحليلات المقارنة فوراً.</p>
-                
-                <div class="mapping-table-wrapper">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 25%;" data-i18n="mapColCode">كود الحساب</th>
-                                <th style="width: 40%;" data-i18n="mapColName">اسم الحساب الخاص بك</th>
-                                <th style="width: 35%;" data-i18n="mapColClass">تصنيف المعايير الدولية (IFRS)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="mappingTableBody">
-                            <!-- سيتم تعبئة الحسابات الفريدة هنا برمجياً -->
-                        </tbody>
-                    </table>
-                </div>
-                <button class="btn-save-mapping" onclick="saveAccountMapping()">
-                    <i class="fa-solid fa-floppy-disk"></i> <span data-i18n="btnSaveMapping">حفظ التوجيه وحقن البيانات بالمنصة</span>
-                </button>
-            </div>
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            handleFile(e.target.files[0]);
+        }
+    });
 
-            <!-- قسم المعاينة للجدول المرفوع الموجه -->
-            <div class="preview-section" id="previewSection">
-                <div class="preview-title">
-                    <span data-i18n="previewHeader">معاينة ميزان المراجعة المرفوع والموجه</span>
-                    <span style="font-size: 14px; color: var(--text-title);" id="rowCount"></span>
-                </div>
-                <div class="table-wrapper">
-                    <table id="previewTable">
-                        <thead>
-                            <tr id="tableHeader">
-                                <!-- سيتم توليد رؤوس الأعمدة برمجياً -->
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
-                            <!-- سيتم تعبئة البيانات الموجهة بالكامل هنا -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- التنبيه التأكيدي المنبثق لمسح البيانات -->
-        <div class="modal" id="confirmModal">
-            <div class="modal-card">
-                <h3 data-i18n="modalConfirmTitle">تنبيه أمني هام!</h3>
-                <p data-i18n="modalConfirmBody">هل أنت متأكد من رغبتك في حذف كافة البيانات المالية المرفوعة وتصفير كافة تحليلات وقوائم المنصة؟ لا يمكن التراجع عن هذا الإجراء.</p>
-                <div class="modal-buttons">
-                    <button class="btn-modal-confirm" onclick="clearFinancialData()" data-i18n="modalConfirmBtn">نعم، تصفير المنصة</button>
-                    <button class="btn-modal-cancel" onclick="closeConfirmModal()" data-i18n="modalCancelBtn">إلغاء</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- صندوق التنبيهات المخصص (Toast) -->
-        <div class="toast-notification" id="toastNotice">
-            <i class="fa-solid fa-triangle-exclamation" style="color: var(--accent-gold); font-size: 18px;"></i>
-            <span id="toastText"></span>
-        </div>
-
-        <!-- التذييل -->
-        <footer>
-            <div>
-                <span data-i18n="footerText">FinSight © 2026 جميع الحقوق محفوظة | تم التطوير بواسطة: </span><span class='developer-name'>أحمد عبد الباسط</span>
-                <a href="https://www.facebook.com/your-profile-link" target="_blank" class="social-link" title="Contact me on Facebook">
-                    <i class="fa-brands fa-facebook"></i>
-                </a>
-            </div>
-        </footer>
-    </main>
-
-    <!-- السيناريوهات والمنطق البرمجي لقراءة البيانات وحفظها سحابياً -->
-    <script>
-        // إعدادات اللغة والمظهر المتزامنة سحابياً عبر localStorage
-        let isLightMode = localStorage.getItem('finSightTheme') === 'light';
-        let currentLang = localStorage.getItem('finSightLang') || 'ar';
-
-        // تخزين البيانات المؤقتة والفريدة أثناء عملية المعالجة
-        let uploadedRawRows = [];
-        let uniqueAccountsList = [];
-
-        const translations = {
-            ar: {
-                navHome: "الرئيسية",
-                navUpload: "رفع ميزان المراجعة",
-                navStatements: "القوائم المالية",
-                navAnalysis: "التحليلات والمقارنات",
-                navAi: "المساعد الذكي",
-                themeLight: "الوضع الفاتح",
-                themeDark: "الوضع الداكن",
-                pageTitle: "إدارة ورفع <span>البيانات المالية</span>",
-                btnTemplate: "تحميل قالب Excel المرن (مبسط)",
-                btnClear: "حذف وتصفير المنصة",
-                dropTitle: "قم بسحب وإفلات ملف ميزان المراجعة هنا",
-                dropSubtitle: "أو اضغط لاختيار الملف من جهازك (يدعم صيغ .xlsx, .xls, .csv)",
-                statusSuccessTitle: "تم رفع ميزان المراجعة بنجاح واستخلاص البيانات!",
-                mappingHeader: "خطوة 2: ربط وتوجيه حساباتك بالمعايير الدولية (IFRS)",
-                mappingSubtitle: "استخلصنا حساباتك الفريدة بنجاح. يرجى توجيه كل حساب للتصنيف الصحيح لإنتاج القوائم والتحليلات فوراً.",
-                mapColCode: "كود الحساب",
-                mapColName: "اسم الحساب الخاص بك",
-                mapColClass: "تصنيف المعايير الدولية (IFRS)",
-                btnSaveMapping: "حفظ التوجيه وحقن البيانات بالمنصة",
-                previewHeader: "معاينة ميزان المراجعة المرفوع والموجه (IFRS)",
-                modalConfirmTitle: "تنبيه أمني هام!",
-                modalConfirmBody: "هل أنت متأكد من رغبتك في حذف كافة البيانات المالية المرفوعة وتصفير كافة تحليلات وقوائم المنصة؟ لا يمكن التراجع عن هذا الإجراء.",
-                modalConfirmBtn: "نعم، تصفير المنصة",
-                modalCancelBtn: "إلغاء",
-                footerText: "FinSight © 2026 جميع الحقوق محفوظة | تم التطوير بواسطة: "
-            },
-            en: {
-                navHome: "Home",
-                navUpload: "Upload Trial Balance",
-                navStatements: "Financial Statements",
-                navAnalysis: "Analytics & Comparisons",
-                navAi: "AI Assistant",
-                themeLight: "Light Mode",
-                themeDark: "Dark Mode",
-                pageTitle: "Manage & Upload <span>Financial Data</span>",
-                btnTemplate: "Download Flexible Excel Template (Simple)",
-                btnClear: "Clear & Reset Platform",
-                dropTitle: "Drag and drop your Trial Balance file here",
-                dropSubtitle: "Or click to select a file from your device (Supports .xlsx, .xls, .csv)",
-                statusSuccessTitle: "Trial Balance successfully uploaded and processed!",
-                mappingHeader: "Step 2: Map Your Accounts to IFRS Standards",
-                mappingSubtitle: "We successfully extracted your unique accounts. Please map each account to its correct classification to produce statements instantly.",
-                mapColCode: "Account Code",
-                mapColName: "Your Account Name",
-                mapColClass: "IFRS Classification",
-                btnSaveMapping: "Save Mapping & Map Financial Data",
-                previewHeader: "Uploaded Trial Balance Preview (IFRS Mapped)",
-                modalConfirmTitle: "Important Security Alert!",
-                modalConfirmBody: "Are you sure you want to permanently delete all uploaded financial data and reset the entire platform? This action cannot be undone.",
-                modalConfirmBtn: "Yes, Reset Platform",
-                modalCancelBtn: "Cancel",
-                footerText: "FinSight © 2026 All Rights Reserved | Developed by: "
-            }
+    // معالجة الملف المقروء
+    function handleFile(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            
+            // قراءة الشيت الأول
+            const firstSheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[firstSheetName];
+            
+            // تحويل البيانات إلى JSON
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+            
+            validateAndProcessData(jsonData);
         };
+        reader.readAsArrayBuffer(file);
+    }
 
-        // تصنيفات IFRS المحاسبية المعتمدة بالمنصة
-        const ifrsCategories = [
-            { id: "أصول غير متداولة - أصول ثابتة", nameAr: "أصول غير متداولة - أصول ثابتة (PPE)", nameEn: "Non-Current Assets - PPE" },
-            { id: "أصول متداولة - نقدية بالبنوك", nameAr: "أصول متداولة - نقدية بالبنوك والصناديق", nameEn: "Current Assets - Cash & Banks" },
-            { id: "أصول متداولة - عملاء", nameAr: "أصول متداولة - عملاء وذمم مدينة", nameEn: "Current Assets - Accounts Receivable" },
-            { id: "أصول متداولة - مخزون", nameAr: "أصول متداولة - مخزون بضاعة", nameEn: "Current Assets - Inventory" },
-            { id: "أصول متداولة - أخرى", nameAr: "أصول متداولة - أخرى وأرصدة مدينة", nameEn: "Current Assets - Other Current Assets" },
-            { id: "حقوق ملكية - رأس المال", nameAr: "حقوق ملكية - رأس المال المدفوع", nameEn: "Equity - Share Capital" },
-            { id: "حقوق ملكية - أرباح مبقاة", nameAr: "حقوق ملكية - أرباح مبقاة / خسائر مدورة", nameEn: "Equity - Retained Earnings" },
-            { id: "التزامات غير متداولة", nameAr: "التزامات غير متداولة (طويلة الأجل)", nameEn: "Non-Current Liabilities" },
-            { id: "التزامات متداولة - موردين", nameAr: "التزامات متداولة - موردين وذمم دائنة", nameEn: "Current Liabilities - Trade Payables" },
-            { id: "التزامات متداولة - أخرى", nameAr: "التزامات متداولة - مصاريف مستحقة وأخرى", nameEn: "Current Liabilities - Other Current Liabilities" },
-            { id: "إيرادات", nameAr: "إيرادات المبيعات والنشاط", nameEn: "Revenue" },
-            { id: "تكلفة المبيعات", nameAr: "تكلفة المبيعات والحصول على النشاط", nameEn: "Cost of Sales" },
-            { id: "مصاريف إدارية وعمومية", nameAr: "مصاريف إدارية وعمومية ومرتبات", nameEn: "SG&A Expenses" },
-            { id: "مصاريف تمويلية", nameAr: "مصاريف تمويلية وعمولات بنكية", nameEn: "Finance Costs" }
-        ];
+    // التحقق من اتزان الميزان ومعالجة البيانات
+    function validateAndProcessData(data) {
+        let totalDebit = 0;
+        let totalCredit = 0;
+        const uniqueAccounts = [];
 
-        // دالة الانتقال الحقيقية بين الصفحات
-        function navigateTo(url) {
-            if (!url) return;
-            try {
-                if (window.location.protocol === 'blob:') {
-                    showPreviewMessage();
-                    return;
-                }
-                window.location.href = url;
-            } catch (error) {
-                console.error("Navigation error:", error);
-                showPreviewMessage();
-            }
-        }
-
-        // إظهار رسالة توضيحية منبثقة (Toast) في وضع المعاينة
-        function showPreviewMessage() {
-            showToast(currentLang === 'ar' 
-                ? 'التنقل بين الصفحات معطل في نافذة المعاينة هذه 🚫. سيعمل بشكل ممتاز عند تشغيل الملفات من جهازك الشخصي.'
-                : 'Page navigation is disabled in this preview window 🚫. It will work perfectly when opened from your local device.');
-        }
-
-        // إظهار تنبيه توست مخصص بدلاً من الـ alert
-        function showToast(message) {
-            const toast = document.getElementById('toastNotice');
-            const toastText = document.getElementById('toastText');
-            toastText.innerText = message;
-            toast.style.display = 'flex';
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 5000);
-        }
-
-        // دالة التهيئة المزامنة
-        function initPage() {
-            if (isLightMode) {
-                document.body.classList.add('light-mode');
-                document.querySelector('#themeToggle i').className = 'fa-solid fa-moon';
-            }
-            if (currentLang === 'en') {
-                document.documentElement.dir = 'ltr';
-                document.documentElement.lang = 'en';
-                document.querySelector('#langToggle span').innerText = 'العربية';
-            }
-            updateTexts();
-            checkExistingData();
-        }
-
-        // تحديث النصوص
-        function updateTexts() {
-            const themeText = document.getElementById('themeText');
-            themeText.innerText = isLightMode ? translations[currentLang].themeDark : translations[currentLang].themeLight;
-
-            const elementsToTranslate = document.querySelectorAll('[data-i18n]');
-            elementsToTranslate.forEach(el => {
-                const translationKey = el.getAttribute('data-i18n');
-                if (translations[currentLang][translationKey]) {
-                    el.innerHTML = translations[currentLang][translationKey];
-                }
-            });
-        }
-
-        // تبديل المظهر
-        function toggleTheme() {
-            isLightMode = !isLightMode;
-            localStorage.setItem('finSightTheme', isLightMode ? 'light' : 'dark');
-            document.body.classList.toggle('light-mode', isLightMode);
-            document.querySelector('#themeToggle i').className = isLightMode ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
-            updateTexts();
-        }
-
-        // تبديل اللغة
-        function toggleLanguage() {
-            currentLang = currentLang === 'ar' ? 'en' : 'ar';
-            localStorage.setItem('finSightLang', currentLang);
-            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-            document.documentElement.lang = currentLang;
-            document.querySelector('#langToggle span').innerText = currentLang === 'ar' ? 'English' : 'العربية';
-            updateTexts();
+        data.forEach(row => {
+            // افتراض أن أسماء الأعمدة في الإكسيل هي "مدين" و "دائن"
+            const debit = parseFloat(row['مدين'] || row['Debit'] || 0);
+            const credit = parseFloat(row['دائن'] || row['Credit'] || 0);
             
-            // تحديث محتوى شاشة التوجيه وجدول المعاينة باللغة الجديدة فورياً
-            if (uniqueAccountsList.length > 0) {
-                renderAccountMappingScreen();
-            }
-            const rawData = localStorage.getItem('financialData');
-            if (rawData) {
-                renderTable(JSON.parse(rawData));
-            }
-        }
+            totalDebit += debit;
+            totalCredit += credit;
 
-        // فحص وجود بيانات سابقة في ذاكرة المتصفح لعرضها مباشرة
-        function checkExistingData() {
-            const savedData = localStorage.getItem('financialData');
-            if (savedData) {
-                const parsedData = JSON.parse(savedData);
-                showSuccessStatus(parsedData.length);
-                renderTable(parsedData);
-                document.getElementById('btnClearData').style.display = 'inline-flex';
-            }
-        }
-
-        // معالجة اختيار الملف وقراءته بالكامل
-        function handleFileSelect(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            processExcelFile(file);
-        }
-
-        // معالجة السحب والإفلات
-        const dropzone = document.getElementById('dropzone');
-        dropzone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropzone.classList.add('dragover');
-        });
-        dropzone.addEventListener('dragleave', () => {
-            dropzone.classList.remove('dragover');
-        });
-        dropzone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropzone.classList.remove('dragover');
-            const file = e.dataTransfer.files[0];
-            if (file) {
-                processExcelFile(file);
-            }
-        });
-
-        // قراءة ومعالجة ملف الإكسيل ومطابقته ببيانات IFRS
-        function processExcelFile(file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                
-                // تحويل الشيت إلى مصفوفة جيسون
-                const jsonData = XLSX.utils.sheet_to_json(worksheet);
-                
-                if (jsonData.length === 0) {
-                    showToast(currentLang === 'ar' ? 'الملف المرفوع فارغ!' : 'Uploaded file is empty!');
-                    return;
-                }
-
-                uploadedRawRows = jsonData;
-                
-                // استخلاص الحسابات الفريدة بشكل فوري وديناميكي
-                extractUniqueAccounts(jsonData);
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        // استخلاص الحسابات الفريدة بالاعتماد على التوليد الذكي للأكواد والأسماء
-        function extractUniqueAccounts(data) {
-            const keys = Object.keys(data[0]);
-            const codeKey = keys.find(k => k.includes('كود') || k.toLowerCase().includes('code') || k.includes('رقم')) || keys[2];
-            const nameKey = keys.find(k => k.includes('اسم') || k.toLowerCase().includes('name')) || keys[3];
-
-            const uniqueMap = {};
-            data.forEach(row => {
-                const code = row[codeKey] || '';
-                const name = row[nameKey] || '';
-                if (code || name) {
-                    uniqueMap[code] = name;
-                }
-            });
-
-            uniqueAccountsList = Object.keys(uniqueMap).map(code => ({
-                code: code,
-                name: uniqueMap[code]
-            }));
-
-            // الانتقال الفوري لخطوة التوجيه (Step 2)
-            showSuccessStatus(data.length);
-            renderAccountMappingScreen();
-        }
-
-        // رسم شاشة توجيه الحسابات (Account Mapping Screen)
-        function renderAccountMappingScreen() {
-            const mappingSection = document.getElementById('mappingSection');
-            const mappingTableBody = document.getElementById('mappingTableBody');
-            const mappingCountText = document.getElementById('mappingCount');
-
-            mappingTableBody.innerHTML = '';
-            mappingCountText.innerText = currentLang === 'ar' 
-                ? `إجمالي الحسابات المطلوب توجيهها: ${uniqueAccountsList.length}`
-                : `Total accounts to map: ${uniqueAccountsList.length}`;
-
-            // سحب التوجيهات المحفوظة مسبقاً (إن وجدت) لتبسيط العمل على المحاسب
-            const savedMappings = JSON.parse(localStorage.getItem('accountMappings') || '{}');
-
-            uniqueAccountsList.forEach(acc => {
-                const tr = document.createElement('tr');
-
-                const tdCode = document.createElement('td');
-                tdCode.innerText = acc.code;
-                tdCode.style.fontWeight = 'bold';
-                
-                const tdName = document.createElement('td');
-                tdName.innerText = acc.name;
-
-                const tdClass = document.createElement('td');
-                const select = document.createElement('select');
-                select.className = 'select-mapping';
-                select.id = `map_${acc.code}`;
-
-                // إضافة خيار افتراضي فارغ لإجبار التوجيه الصحيح
-                const defOption = document.createElement('option');
-                defOption.value = '';
-                defOption.innerText = currentLang === 'ar' ? '-- اختر تصنيف المعايير الدولية --' : '-- Choose IFRS Classification --';
-                select.appendChild(defOption);
-
-                ifrsCategories.forEach(cat => {
-                    const option = document.createElement('option');
-                    option.value = cat.id;
-                    option.innerText = currentLang === 'ar' ? cat.nameAr : cat.nameEn;
-                    select.appendChild(option);
+            // استخراج الحسابات لتوجيهها لاحقاً
+            if (row['اسم الحساب'] || row['Account Name']) {
+                uniqueAccounts.push({
+                    code: row['كود الحساب'] || row['Account Code'] || '-',
+                    name: row['اسم الحساب'] || row['Account Name'],
+                    balance: debit > 0 ? debit + ' (مدين)' : credit + ' (دائن)'
                 });
-
-                // تطبيق التوجيه القديم تلقائياً إذا وجد في قاعدة البيانات لزيادة سرعة وسهولة الرفع
-                if (savedMappings[acc.code]) {
-                    select.value = savedMappings[acc.code];
-                }
-
-                tdClass.appendChild(select);
-
-                tr.appendChild(tdCode);
-                tr.appendChild(tdName);
-                tr.appendChild(tdClass);
-
-                mappingTableBody.appendChild(tr);
-            });
-
-            // إظهار شاشة الربط وإخفاء معاينة البيانات النهائية حتى يكتمل التوجيه
-            mappingSection.style.display = 'block';
-            document.getElementById('previewSection').style.display = 'none';
-        }
-
-        // حفظ التوجيه المحاسبي وحقن البيانات آلياً بالمنصة
-        function saveAccountMapping() {
-            const mappings = {};
-            let allMapped = true;
-
-            uniqueAccountsList.forEach(acc => {
-                const select = document.getElementById(`map_${acc.code}`);
-                const value = select.value;
-                if (!value) {
-                    allMapped = false;
-                }
-                mappings[acc.code] = value;
-            });
-
-            if (!allMapped) {
-                showToast(currentLang === 'ar' 
-                    ? 'الرجاء اختيار تصنيف لجميع الحسابات لضمان دقة القوائم المالية والتحليلات!' 
-                    : 'Please select IFRS classifications for all accounts to guarantee statement accuracy!');
-                return;
             }
+        });
 
-            // حفظ التوجيهات آلياً في الذاكرة
-            localStorage.setItem('accountMappings', JSON.stringify(mappings));
+        // التحقق من الاتزان (نسمح بفارق بسيط جداً للكسور العشرية)
+        const isBalanced = Math.abs(totalDebit - totalCredit) < 0.1;
 
-            // دمج وحقن البيانات: دمج التوجيهات بملف ميزان المراجعة لتبسيط قراءتها بباقي الصفحات
-            const keys = Object.keys(uploadedRawRows[0]);
-            const codeKey = keys.find(k => k.includes('كود') || k.toLowerCase().includes('code') || k.includes('رقم')) || keys[2];
+        if (isBalanced) {
+            statusMessage.textContent = "✅ ممتاز! تمت قراءة الميزان بنجاح، والميزان متزن. إجمالي المدين: " + totalDebit.toFixed(2) + " = إجمالي الدائن: " + totalCredit.toFixed(2);
+            statusMessage.className = "status-message status-success";
+            statusMessage.style.display = "block";
+            
+            // عرض شاشة التوجيه
+            renderMappingScreen(uniqueAccounts);
+        } else {
+            statusMessage.textContent = "❌ خطأ! الميزان غير متزن. إجمالي المدين (" + totalDebit.toFixed(2) + ") لا يساوي إجمالي الدائن (" + totalCredit.toFixed(2) + "). يرجى مراجعة الملف.";
+            statusMessage.className = "status-message status-error";
+            statusMessage.style.display = "block";
+            mappingSection.style.display = "none";
+        }
+    }
 
-            const mappedData = uploadedRawRows.map(row => {
-                const code = row[codeKey] || '';
-                const classification = mappings[code] || '';
-                return {
-                    ...row,
-                    "تصنيف المعايير (IFRS)": classification
-                };
+    // بناء شاشة توجيه الحسابات
+    function renderMappingScreen(accounts) {
+        mappingTableBody.innerHTML = ''; // مسح البيانات القديمة
+
+        accounts.forEach(acc => {
+            const tr = document.createElement('tr');
+            
+            // إنشاء قائمة التصنيفات المنسدلة
+            let selectHTML = `<select class="category-select" data-acc-code="${acc.code}">`;
+            ifrsCategories.forEach(cat => {
+                selectHTML += `<option value="${cat}">${cat}</option>`;
             });
+            selectHTML += `</select>`;
 
-            // حفظ ميزان المراجعة المدمج الموجه بالكامل بالمنصة
-            localStorage.setItem('financialData', JSON.stringify(mappedData));
+            tr.innerHTML = `
+                <td>${acc.code}</td>
+                <td>${acc.name}</td>
+                <td>${acc.balance}</td>
+                <td>${selectHTML}</td>
+            `;
+            mappingTableBody.appendChild(tr);
+        });
 
-            showToast(currentLang === 'ar' ? 'تم حفظ التوجيه وربط البيانات بنجاح!' : 'Account mapping and financial data successfully saved!');
-            
-            // تفعيل وعرض معاينة الجدول والبيانات النهائية وتفعيل زر مسح وتصفير المنصة
-            renderTable(mappedData);
-            document.getElementById('btnClearData').style.display = 'inline-flex';
-            document.getElementById('mappingSection').style.display = 'none';
-        }
+        // إظهار القسم
+        mappingSection.style.display = "block";
+    }
 
-        // إظهار صندوق النجاح
-        function showSuccessStatus(rowsCount, filename = '') {
-            const statusBox = document.getElementById('statusBox');
-            const statusDetails = document.getElementById('statusDetails');
-            statusBox.classList.add('success');
-            
-            if (currentLang === 'ar') {
-                statusDetails.innerText = `تم استيراد ${rowsCount} سجلاً بنجاح من الملف ${filename ? `'${filename}'` : ''}. تم استخلاص حسابات ميزان المراجعة بنجاح.`;
-            } else {
-                statusDetails.innerText = `Successfully imported ${rowsCount} records from the file ${filename ? `'${filename}'` : ''}. Unique accounts processed.`;
-            }
-        }
-
-        // رسم جدول المعاينة ديناميكياً ليدعم الأعمدة المحاسبية المخصصة الجديدة
-        function renderTable(data) {
-            const previewSection = document.getElementById('previewSection');
-            const headerRow = document.getElementById('tableHeader');
-            const tableBody = document.getElementById('tableBody');
-            const rowCountText = document.getElementById('rowCount');
-
-            headerRow.innerHTML = '';
-            tableBody.innerHTML = '';
-
-            if (data.length === 0) {
-                previewSection.style.display = 'none';
-                return;
-            }
-
-            // تحديد أسماء الحقول بناءً على اللغة المتوافقة مع القالب الجديد
-            const headers = currentLang === 'ar' 
-                ? ["السنة", "الشهر", "كود الحساب", "اسم الحساب", "تصنيف المعايير (IFRS)", "المدين", "الدائن"]
-                : ["Year", "Month", "Account Code", "Account Name", "IFRS Class", "Debit", "Credit"];
-
-            // بناء ترويسة الجدول
-            headers.forEach(headerText => {
-                const th = document.createElement('th');
-                th.innerText = headerText;
-                headerRow.appendChild(th);
+    // دالة حفظ التوجيهات
+    function saveMapping() {
+        const selects = document.querySelectorAll('.category-select');
+        const mappingData = [];
+        
+        selects.forEach(select => {
+            mappingData.push({
+                accountCode: select.getAttribute('data-acc-code'),
+                category: select.value
             });
+        });
 
-            // العثور على المفاتيح الحقيقية في جيسون للتوفيق الذكي (عربي وإنجليزي)
-            const sample = data[0];
-            const keys = Object.keys(sample);
-            
-            // خرائط توجيه ذكية للمفاتيح الجديدة
-            const yearKey = keys.find(k => k.includes('سنة') || k.toLowerCase().includes('year') || k.includes('السنة')) || keys[0];
-            const monthKey = keys.find(k => k.includes('شهر') || k.toLowerCase().includes('month') || k.includes('الشهر')) || keys[1];
-            const codeKey = keys.find(k => k.includes('كود') || k.toLowerCase().includes('code') || k.includes('رقم')) || keys[2];
-            const nameKey = keys.find(k => k.includes('اسم') || k.toLowerCase().includes('name')) || keys[3];
-            const classKey = keys.find(k => k.includes('تصنيف') || k.toLowerCase().includes('class') || k.includes('IFRS')) || keys[4];
-            const debitKey = keys.find(k => k.includes('مدين') || k.toLowerCase().includes('debit')) || keys[5];
-            const creditKey = keys.find(k => k.includes('دائن') || k.toLowerCase().includes('credit')) || keys[6];
+        // حفظ البيانات في LocalStorage لتستخدمها الصفحات الأخرى
+        localStorage.setItem('accountMapping', JSON.stringify(mappingData));
+        alert("تم حفظ توجيه الحسابات بنجاح! سيتم نقلك الآن لصفحة إعداد القوائم.");
+        
+        // الانتقال إلى الصفحة التالية (يمكنك تعديل الرابط حسب مشروعك)
+        // window.location.href = 'statements.html';
+    }
+</script>
 
-            // تعبئة البيانات (أول 50 سجلاً فقط للمعاينة حفاظاً على أداء المتصفح)
-            const limit = Math.min(data.length, 50);
-            for (let i = 0; i < limit; i++) {
-                const row = data[i];
-                const tr = document.createElement('tr');
-
-                const tdYear = document.createElement('td');
-                tdYear.innerText = row[yearKey] || '';
-                
-                const tdMonth = document.createElement('td');
-                tdMonth.innerText = row[monthKey] || '';
-
-                const tdCode = document.createElement('td');
-                tdCode.innerText = row[codeKey] || '';
-                
-                const tdName = document.createElement('td');
-                tdName.innerText = row[nameKey] || '';
-                
-                const tdClass = document.createElement('td');
-                tdClass.innerText = row[classKey] || (currentLang === 'ar' ? 'غير موجه' : 'Unmapped');
-                tdClass.style.color = row[classKey] ? 'var(--text-title)' : 'var(--danger-color)';
-                tdClass.style.fontWeight = '600';
-                
-                const tdDebit = document.createElement('td');
-                tdDebit.innerText = formatNumber(row[debitKey]);
-                
-                const tdCredit = document.createElement('td');
-                tdCredit.innerText = formatNumber(row[creditKey]);
-
-                tr.appendChild(tdYear);
-                tr.appendChild(tdMonth);
-                tr.appendChild(tdCode);
-                tr.appendChild(tdName);
-                tr.appendChild(tdClass);
-                tr.appendChild(tdDebit);
-                tr.appendChild(tdCredit);
-
-                tableBody.appendChild(tr);
-            }
-
-            rowCountText.innerText = currentLang === 'ar' 
-                ? `يعرض أول 50 سجلاً من إجمالي ${data.length}`
-                : `Showing first 50 of ${data.length} records`;
-
-            previewSection.style.display = 'block';
-        }
-
-        // تنسيق الأرقام محاسبياً
-        function formatNumber(value) {
-            const num = parseFloat(value);
-            if (isNaN(num)) return '0.00';
-            return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
-
-        // توليد وتنزيل قالب ميزان المراجعة الذكي المفرغ والمناسب لتوجيه المنصة
-        function generateAndDownloadTemplate() {
-            // شيت ميزان المراجعة الفارغ والحر والمبسط كما طلب المستخدم بدقة
-            const trialBalanceData = [
-                { 
-                    "السنة (Year)": 2026, 
-                    "الشهر (Month)": 1, 
-                    "رقم الحساب (Account Code)": "1001", 
-                    "اسم الحساب (Account Name)": "النقدية لدى الصندوق والبنوك", 
-                    "المدين (Debit)": 280000, 
-                    "الدائن (Credit)": 0 
-                },
-                { 
-                    "السنة (Year)": 2026, 
-                    "الشهر (Month)": 1, 
-                    "رقم الحساب (Account Code)": "1002", 
-                    "اسم الحساب (Account Name)": "حسابات الذمم التجارية المدينة", 
-                    "المدين (Debit)": 120000, 
-                    "الدائن (Credit)": 0 
-                },
-                { 
-                    "السنة (Year)": 2026, 
-                    "الشهر (Month)": 1, 
-                    "رقم الحساب (Account Code)": "1003", 
-                    "اسم الحساب (Account Name)": "مخزون بضاعة المستودع الرئيسي", 
-                    "المدين (Debit)": 160000, 
-                    "الدائن (Credit)": 0 
-                },
-                { 
-                    "السنة (Year)": 2026, 
-                    "الشهر (Month)": 1, 
-                    "رقم الحساب (Account Code)": "2001", 
-                    "اسم الحساب (Account Name)": "شركة الموردين للتوريدات والمقاولات", 
-                    "المدين (Debit)": 0, 
-                    "الدائن (Credit)": 95000 
-                },
-                { 
-                    "السنة (Year)": 2026, 
-                    "الشهر (Month)": 1, 
-                    "رقم الحساب (Account Code)": "3001", 
-                    "اسم الحساب (Account Name)": "رأس المال المكتتب به والمدفوع", 
-                    "المدين (Debit)": 0, 
-                    "الدائن (Credit)": 400000 
-                },
-                { 
-                    "السنة (Year)": 2026, 
-                    "الشهر (Month)": 1, 
-                    "رقم الحساب (Account Code)": "4001", 
-                    "اسم الحساب (Account Name)": "إيرادات المبيعات والخدمات الاستشارية", 
-                    "المدين (Debit)": 0, 
-                    "الدائن (Credit)": 190000 
-                },
-                { 
-                    "السنة (Year)": 2026, 
-                    "الشهر (Month)": 1, 
-                    "رقم الحساب (Account Code)": "5001", 
-                    "اسم الحساب (Account Name)": "تكاليف ومصاريف الحصول على المبيعات", 
-                    "المدين (Debit)": 110000, 
-                    "الدائن (Credit)": 0 
-                },
-                { 
-                    "السنة (Year)": 2026, 
-                    "الشهر (Month)": 1, 
-                    "رقم الحساب (Account Code)": "5002", 
-                    "اسم الحساب (Account Name)": "مصاريف إدارية وعمومية ومرتبات", 
-                    "المدين (Debit)": 15000, 
-                    "الدائن (Credit)": 0 
-                }
-            ];
-
-            // بناء كتاب العمل (Workbook) الجديد بإستخدام SheetJS
-            const workbook = XLSX.utils.book_new();
-
-            // تحويل البيانات لشيت مستقل وبسيط جداً يسهل على المحاسب ملؤه بحرية تامة
-            const wsTrialBalance = XLSX.utils.json_to_sheet(trialBalanceData);
-
-            // دمج وتسمية الشيت
-            XLSX.utils.book_append_sheet(workbook, wsTrialBalance, "Trial_Balance");
-
-            // تنزيل الملف بشكل آلي وفوري على جهاز المستخدم
-            XLSX.writeFile(workbook, "FinSight_Flexible_Simple_Template.xlsx");
-            showToast(currentLang === 'ar' ? 'تم تنزيل قالب الإكسيل المبسط بنجاح!' : 'Flexible simple template successfully downloaded!');
-        }
-
-        // إدارة النوافذ المنبثقة للتأكيد ومسح البيانات
-        function showConfirmModal() {
-            document.getElementById('confirmModal').style.display = 'flex';
-        }
-
-        function closeConfirmModal() {
-            document.getElementById('confirmModal').style.display = 'none';
-        }
-
-        function clearFinancialData() {
-            localStorage.removeItem('financialData');
-            localStorage.removeItem('accountMappings'); // حذف التوجيهات أيضاً لتصفير حقيقي
-            document.getElementById('statusBox').classList.remove('success');
-            document.getElementById('previewSection').style.display = 'none';
-            document.getElementById('mappingSection').style.display = 'none';
-            document.getElementById('btnClearData').style.display = 'none';
-            closeConfirmModal();
-            
-            setTimeout(() => {
-                showToast(currentLang === 'ar' ? 'تم تصفير المنصة بالكامل وحذف ذاكرة العمل المحفوظة بنجاح!' : 'Platform cleared and working data successfully deleted!');
-            }, 100);
-        }
-
-        document.addEventListener('DOMContentLoaded', initPage);
-    </script>
 </body>
 </html>

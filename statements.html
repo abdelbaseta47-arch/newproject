@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinSight - القوائم المالية الدولية</title>
+    <!-- استيراد الخطوط الاحترافية -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- مكتبة الأيقونات الشهيرة -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        /* إعدادات المتغيرات للوضع الداكن (الافتراضي) */
+        :root {
+            --bg-main: #020c1b;
+            --bg-surface: #0a192f;
+            --bg-sidebar: #112240;
+            --text-title: #64ffda;
+            --text-main: #e6f1ff;
+            --text-muted: #8892b0;
+            --accent-gold: #ffd700;
+            --border-color: #233554;
+            --danger-color: #ff5f56;
+            --success-color: #27c93f;
+            --font-main: 'Tajawal', sans-serif;
+            --font-title: 'Cairo', sans-serif;
+            --sidebar-width: 70px;
+            --sidebar-width-expanded: 260px;
+        }
+
+        /* متغيرات الوضع الفاتح */
+        body.light-mode {
+            --bg-main: #f3f4f6;
+            --bg-surface: #ffffff;
+            --bg-sidebar: #ffffff;
+            --text-title: #0052cc;
+            --text-main: #111827;
+            --text-muted: #4b5563;
+            --accent-gold: #d97706;
+            --border-color: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* الشريط الجانبي (Sidebar) */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            inset-inline-start: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: var(--bg-sidebar);
+            border-inline-end: 1px solid var(--border-color);
+            z-index: 1000;
+            overflow-x: hidden;
+            transition: width 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            padding-top: 20px;
+        }
+
+        .sidebar:hover {
+            width: var(--sidebar-width-expanded);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            margin-bottom: 40px;
+            white-space: nowrap;
+        }
+
+        .logo-icon {
+            font-size: 28px;
+            color: var(--accent-gold);
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .logo-text {
+            font-family: var(--font-title);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-title);
+            margin-inline-start: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .sidebar:hover .logo-text {
+            opacity: 1;
+        }
+
+        /* روابط التنقل الحقيقية في الشريط الجانبي */
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            cursor: pointer;
+            white-space: nowrap;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: all 0.2s;
+            border-inline-end: 4px solid transparent;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(100, 255, 218, 0.1);
+            color: var(--text-title);
+            border-inline-end: 4px solid var(--text-title);
+        }
+
+        body.light-mode .nav-link:hover, body.light-mode .nav-link.active {
+            background-color: rgba(0, 82, 204, 0.1);
+        }
+
+        .nav-icon {
+            font-size: 22px;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .nav-text {
+            font-size: 16px;
+            font-weight: 500;
+            margin-inline-start: 15px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .sidebar:hover .nav-text {
+            opacity: 1;
+        }
+
+        /* محتوى الصفحة الرئيسي */
+        .main-content {
+            margin-inline-start: var(--sidebar-width);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            transition: margin-inline-start 0.3s ease;
+        }
+
+        /* الشريط العلوي */
+        .top-bar {
+            height: 60px;
+            background-color: var(--bg-surface);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0 30px;
+            gap: 20px;
+        }
+
+        .action-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            color: var(--text-title);
+            border-color: var(--text-title);
+        }
+
+        /* حاوية التقارير */
+        .statements-container {
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            flex-grow: 1;
+        }
+
+        .page-header {
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .page-title {
+            font-family: var(--font-title);
+            font-size: 32px;
+            color: var(--text-main);
+        }
+
+        .page-title span {
+            color: var(--text-title);
+        }
+
+        /* شريط التصفية والفلترة للوقت */
+        .filter-bar {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 35px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .filter-label {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .filter-select {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-family: var(--font-main);
+            font-size: 14px;
+            cursor: pointer;
+            min-width: 150px;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--text-title);
+        }
+
+        /* شريط التبويبات الأفقي في الأعلى */
+        .tabs-header {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            gap: 10px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .tab-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 15px 25px;
+            font-family: var(--font-title);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-title);
+        }
+
+        .tab-btn.active {
+            color: var(--text-title);
+        }
+
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: var(--text-title);
+        }
+
+        /* صناديق القوائم المالية والمحتوى */
+        .statement-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 35px;
+            margin-bottom: 40px;
+            display: none;
+        }
+
+        .statement-card.active {
+            display: block;
+        }
+
+        .statement-meta {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .company-name {
+            font-family: var(--font-title);
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 5px;
+        }
+
+        .statement-name {
+            font-family: var(--font-title);
+            font-size: 20px;
+            color: var(--text-title);
+            margin-bottom: 5px;
+        }
+
+        .statement-period {
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        /* تنسيق الجداول المحاسبية الفخمة */
+        .accounting-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .accounting-table th {
+            background-color: var(--bg-sidebar);
+            color: var(--text-title);
+            font-family: var(--font-title);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 15px 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .accounting-table td {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 15px;
+        }
+
+        /* الصفوف المحاسبية الخاصة */
+        .row-indent {
+            padding-inline-start: 40px !important;
+            color: var(--text-muted);
+        }
+
+        .row-subtotal {
+            font-weight: 600;
+            background-color: rgba(100, 255, 218, 0.02);
+        }
+
+        .row-total {
+            font-weight: 700;
+            font-size: 16px !important;
+            border-top: 1px solid var(--text-main);
+            border-bottom: 4px double var(--text-main) !important;
+            background-color: rgba(100, 255, 218, 0.05);
+        }
+
+        .row-category {
+            font-family: var(--font-title);
+            font-weight: 700;
+            font-size: 16px !important;
+            color: var(--text-title);
+            background-color: rgba(100, 255, 218, 0.01);
+        }
+
+        .text-num {
+            font-family: sans-serif;
+            font-weight: 600;
+            text-align: end;
+        }
+
+        .variance-positive {
+            color: var(--success-color);
+        }
+
+        .variance-negative {
+            color: var(--danger-color);
+        }
+
+        /* شاشة التنبيه عندما لا توجد بيانات */
+        .no-data-box {
+            text-align: center;
+            padding: 60px 40px;
+            background-color: var(--bg-surface);
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .no-data-box i {
+            font-size: 60px;
+            color: var(--accent-gold);
+            margin-bottom: 20px;
+        }
+
+        .no-data-box h3 {
+            font-family: var(--font-title);
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .no-data-box p {
+            color: var(--text-muted);
+            font-size: 16px;
+            margin-bottom: 25px;
+        }
+
+        .actions-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-redirect {
+            background-color: var(--text-title);
+            color: var(--bg-main);
+            border: none;
+            padding: 12px 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-weight: 700;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-redirect:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        .btn-demo {
+            background-color: transparent;
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold);
+            padding: 12px 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: var(--font-main);
+            font-weight: 700;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-demo:hover {
+            background-color: rgba(255, 215, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        body.light-mode .btn-redirect {
+            background-color: var(--text-title);
+            color: #ffffff;
+        }
+
+        /* تنبيهات مخصصة */
+        .toast-notification {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-surface);
+            border: 1px solid var(--text-title);
+            color: var(--text-main);
+            padding: 15px 25px;
+            border-radius: 8px;
+            z-index: 9999;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-family: var(--font-main);
+            font-weight: bold;
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* صندوق فحص اتزان الميزانية */
+        .balance-check-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-top: 15px;
+        }
+
+        .badge-balanced {
+            background-color: rgba(39, 201, 63, 0.1);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .badge-unbalanced {
+            background-color: rgba(255, 95, 86, 0.1);
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
+
+        /* التذييل */
+        footer {
+            background-color: var(--bg-surface);
+            border-top: 1px solid var(--border-color);
+            padding: 25px 40px;
+            text-align: center;
+            font-size: 14px;
+            color: var(--text-muted);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .developer-name {
+            color: var(--accent-gold);
+            font-weight: bold;
+        }
+
+        .social-link {
+            color: #1877F2;
+            font-size: 20px;
+            margin-inline-start: 10px;
+            text-decoration: none;
+            transition: transform 0.3s;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        .social-link:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- الشريط الجانبي بروابط حقيقية -->
+    <nav class="sidebar" id="sidebar">
+        <div class="logo-container">
+            <i class="fa-solid fa-chart-pie logo-icon"></i>
+            <span class="logo-text">FinSight</span>
+        </div>
+
+        <a href="index.html" class="nav-link">
+            <i class="fa-solid fa-house nav-icon"></i>
+            <span class="nav-text" data-i18n="navHome">الرئيسية</span>
+        </a>
+        
+        <a href="upload.html" class="nav-link">
+            <i class="fa-solid fa-cloud-arrow-up nav-icon"></i>
+            <span class="nav-text" data-i18n="navUpload">رفع ميزان المراجعة</span>
+        </a>
+
+        <a href="statement.html" class="nav-link active">
+            <i class="fa-solid fa-file-invoice-dollar nav-icon"></i>
+            <span class="nav-text" data-i18n="navStatements">القوائم المالية</span>
+        </a>
+
+        <a href="analysis.html" class="nav-link">
+            <i class="fa-solid fa-chart-line nav-icon"></i>
+            <span class="nav-text" data-i18n="navAnalysis">التحليلات والمقارنات</span>
+        </a>
+
+        <a href="ai.html" class="nav-link">
+            <i class="fa-solid fa-robot nav-icon"></i>
+            <span class="nav-text" data-i18n="navAi">المساعد الذكي</span>
+        </a>
+    </nav>
+
+    <!-- المحتوى الرئيسي -->
+    <main class="main-content">
+        <!-- الشريط العلوي -->
+        <div class="top-bar">
+            <button class="action-btn" id="langToggle" onclick="toggleLanguage()">
+                <i class="fa-solid fa-globe"></i> <span>English</span>
+            </button>
+            <button class="action-btn" id="themeToggle" onclick="toggleTheme()">
+                <i class="fa-solid fa-sun"></i> <span id="themeText" data-i18n="themeLight">الوضع الفاتح</span>
+            </button>
+        </div>
+
+        <!-- مساحة القوائم المالية -->
+        <div class="statements-container">
+            <div class="page-header">
+                <h1 class="page-title" data-i18n="pageTitle">التقارير والقوائم <span>المالية الدولية (IFRS)</span></h1>
+            </div>
+
+            <!-- شاشة التنبيه في حالة عدم رفع بيانات مسبقاً -->
+            <div class="no-data-box" id="noDataBox">
+                <i class="fa-solid fa-folder-open"></i>
+                <h3 data-i18n="noDataTitle">لا توجد بيانات مرفوعة بالمنصة!</h3>
+                <p data-i18n="noDataDesc">يرجى رفع ملف ميزان المراجعة، أو تجربة المنصة فوراً بتحميل ميزان مراجعة تجريبي متكامل للشركة.</p>
+                <div class="actions-group">
+                    <a href="upload.html" class="btn-redirect">
+                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                        <span data-i18n="btnNoDataGo">الذهاب لرفع ميزان المراجعة</span>
+                    </a>
+                    <button class="btn-demo" onclick="loadDemoFinancialData()">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <span>عرض البيانات التجريبية فوراً</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- واجهة التقارير النشطة والمجهزة بالكامل -->
+            <div id="activeReportsArea" style="display: none;">
+                <!-- شريط التصفية والفلترة للوقت -->
+                <div class="filter-bar">
+                    <div class="filter-group">
+                        <label class="filter-label" data-i18n="filterYear">اختر السنة المالية</label>
+                        <select class="filter-select" id="selectYear" onchange="onPeriodChange()"></select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label" data-i18n="filterMonth">اختر الشهر المالي</label>
+                        <select class="filter-select" id="selectMonth" onchange="onPeriodChange()"></select>
+                    </div>
+                </div>
+
+                <!-- شريط التبويبات الأفقي في الأعلى -->
+                <div class="tabs-header">
+                    <button class="tab-btn active" onclick="switchTab(event, 'incomeTab')" data-i18n="tabIncome">قائمة الدخل</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'balanceTab')" data-i18n="tabBalance">المركز المالي</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'cashFlowTab')" data-i18n="tabCashFlow">التدفقات النقدية</button>
+                    <button class="tab-btn" onclick="switchTab(event, 'equityTab')" data-i18n="tabEquity">التغيرات في حقوق الملكية</button>
+                </div>
+
+                <!-- 1. تبويب قائمة الدخل -->
+                <div class="statement-card active" id="incomeTab">
+                    <div class="statement-meta">
+                        <div class="company-name" id="incCoName">FinSight Analytics Corp</div>
+                        <div class="statement-name" data-i18n="titleIncome">قائمة الدخل الشامل (IFRS)</div>
+                        <div class="statement-period" id="incPeriod"></div>
+                    </div>
+                    <table class="accounting-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 70%;" data-i18n="colItem">البند المالي</th>
+                                <th style="width: 30%; text-align: end;" data-i18n="colAmount">المبلغ (USD)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="incomeTableBody">
+                            <!-- سيتم تعبئتها ديناميكياً -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 2. تبويب قائمة المركز المالي -->
+                <div class="statement-card" id="balanceTab">
+                    <div class="statement-meta">
+                        <div class="company-name" id="balCoName">FinSight Analytics Corp</div>
+                        <div class="statement-name" data-i18n="titleBalance">قائمة المركز المالي الختامية (IFRS)</div>
+                        <div class="statement-period" id="balPeriod"></div>
+                        <div class="balance-check-badge badge-balanced" id="balanceStatusBadge">
+                            <i class="fa-solid fa-circle-check"></i> <span id="balanceStatusText"></span>
+                        </div>
+                    </div>
+                    <table class="accounting-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 70%;" data-i18n="colItem">البند المالي</th>
+                                <th style="width: 30%; text-align: end;" data-i18n="colAmount">المبلغ (USD)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="balanceTableBody">
+                            <!-- سيتم تعبئتها ديناميكياً -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 3. تبويب قائمة التدفقات النقدية -->
+                <div class="statement-card" id="cashFlowTab">
+                    <div class="statement-meta">
+                        <div class="company-name" id="cfCoName">FinSight Analytics Corp</div>
+                        <div class="statement-name" data-i18n="titleCashFlow">قائمة التدفقات النقدية (الطريقة غير المباشرة)</div>
+                        <div class="statement-period" id="cfPeriod"></div>
+                    </div>
+                    <table class="accounting-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 70%;" data-i18n="colItem">البند المالي</th>
+                                <th style="width: 30%; text-align: end;" data-i18n="colAmount">المبلغ (USD)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cfTableBody">
+                            <!-- سيتم تعبئتها ديناميكياً -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 4. تبويب قائمة حقوق الملكية -->
+                <div class="statement-card" id="equityTab">
+                    <div class="statement-meta">
+                        <div class="company-name" id="eqCoName">FinSight Analytics Corp</div>
+                        <div class="statement-name" data-i18n="titleEquity">قائمة التغيرات في حقوق الملكية</div>
+                        <div class="statement-period" id="eqPeriod"></div>
+                    </div>
+                    <table class="accounting-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 70%;" data-i18n="colItem">البند المالي</th>
+                                <th style="width: 30%; text-align: end;" data-i18n="colAmount">المبلغ (USD)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="eqTableBody">
+                            <!-- سيتم تعبئتها ديناميكياً -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- صندوق التنبيهات المخصص (Toast) -->
+        <div class="toast-notification" id="toastNotice">
+            <i class="fa-solid fa-circle-check" style="color: var(--success-color); font-size: 18px;" id="toastIcon"></i>
+            <span id="toastText"></span>
+        </div>
+
+        <!-- التذييل -->
+        <footer>
+            <div>
+                <span data-i18n="footerText">FinSight © 2026 جميع الحقوق محفوظة | تم التطوير بواسطة: </span><span class='developer-name'>أحمد عبد الباسط</span>
+                <a href="https://www.facebook.com/your-profile-link" target="_blank" class="social-link" title="Contact me on Facebook">
+                    <i class="fa-brands fa-facebook"></i>
+                </a>
+            </div>
+        </footer>
+    </main>
+
+    <!-- المنطق المالي والمحاسبي والبرمجي للقوائم -->
+    <script>
+        let isLightMode = localStorage.getItem('finSightTheme') === 'light';
+        let currentLang = localStorage.getItem('finSightLang') || 'ar';
+
+        let financialData = [];
+        let availableYears = [];
+        let availableMonths = [];
+        let selectedYear = null;
+        let selectedMonth = null;
+
+        const translations = {
+            ar: {
+                navHome: "الرئيسية",
+                navUpload: "رفع ميزان المراجعة",
+                navStatements: "القوائم المالية",
+                navAnalysis: "التحليلات والمقارنات",
+                navAi: "المساعد الذكي",
+                themeLight: "الوضع الفاتح",
+                themeDark: "الوضع الداكن",
+                pageTitle: "التقارير والقوائم <span>المالية الدولية (IFRS)</span>",
+                noDataTitle: "لا توجد بيانات مرفوعة بالمنصة!",
+                noDataDesc: "يرجى رفع ملف ميزان المراجعة، أو تجربة المنصة فوراً بتحميل ميزان مراجعة تجريبي متكامل للشركة.",
+                btnNoDataGo: "الذهاب لرفع ميزان المراجعة",
+                filterYear: "اختر السنة المالية",
+                filterMonth: "اختر الشهر المالي",
+                tabIncome: "قائمة الدخل",
+                tabBalance: "المركز المالي",
+                tabCashFlow: "التدفقات النقدية",
+                tabEquity: "التغيرات في حقوق الملكية",
+                titleIncome: "قائمة الدخل الشامل (IFRS)",
+                titleBalance: "قائمة المركز المالي الختامية (IFRS)",
+                titleCashFlow: "قائمة التدفقات النقدية (الطريقة غير المباشرة)",
+                titleEquity: "قائمة التغيرات في حقوق الملكية",
+                colItem: "البند المالي",
+                colAmount: "المبلغ (USD)",
+                footerText: "FinSight © 2026 جميع الحقوق محفوظة | تم التطوير بواسطة: "
+            },
+            en: {
+                navHome: "Home",
+                navUpload: "Upload Trial Balance",
+                navStatements: "Financial Statements",
+                navAnalysis: "Analytics & Comparisons",
+                navAi: "AI Assistant",
+                themeLight: "Light Mode",
+                themeDark: "Dark Mode",
+                pageTitle: "International <span>Financial Statements (IFRS)</span>",
+                noDataTitle: "No financial data uploaded yet!",
+                noDataDesc: "Please upload your Trial Balance, or try the platform instantly with comprehensive demo data.",
+                btnNoDataGo: "Go to Data Upload",
+                filterYear: "Select Fiscal Year",
+                filterMonth: "Select Fiscal Month",
+                tabIncome: "Income Statement",
+                tabBalance: "Balance Sheet",
+                tabCashFlow: "Cash Flows",
+                tabEquity: "Changes in Equity",
+                titleIncome: "Statement of Comprehensive Income (IFRS)",
+                titleBalance: "Statement of Financial Position (IFRS)",
+                titleCashFlow: "Statement of Cash Flows (Indirect Method)",
+                titleEquity: "Statement of Changes in Equity",
+                colItem: "Financial Line Item",
+                colAmount: "Amount (USD)",
+                footerText: "FinSight © 2026 All Rights Reserved | Developed by: "
+            }
+        };
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toastNotice');
+            const toastText = document.getElementById('toastText');
+            const toastIcon = document.getElementById('toastIcon');
+            
+            toastText.innerText = message;
+            if (isError) {
+                toastIcon.className = "fa-solid fa-triangle-exclamation";
+                toastIcon.style.color = "var(--danger-color)";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-check";
+                toastIcon.style.color = "var(--success-color)";
+            }
+            toast.style.display = 'flex';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 5000);
+        }
+
+        function initPage() {
+            if (isLightMode) {
+                document.body.classList.add('light-mode');
+                document.querySelector('#themeToggle i').className = 'fa-solid fa-moon';
+            }
+            if (currentLang === 'en') {
+                document.documentElement.dir = 'ltr';
+                document.documentElement.lang = 'en';
+                document.querySelector('#langToggle span').innerText = 'العربية';
+            }
+            updateTexts();
+            loadAndProcessFinancialData();
+        }
+
+        function updateTexts() {
+            const themeText = document.getElementById('themeText');
+            themeText.innerText = isLightMode ? translations[currentLang].themeDark : translations[currentLang].themeLight;
+
+            const elementsToTranslate = document.querySelectorAll('[data-i18n]');
+            elementsToTranslate.forEach(el => {
+                const translationKey = el.getAttribute('data-i18n');
+                if (translations[currentLang][translationKey]) {
+                    el.innerHTML = translations[currentLang][translationKey];
+                }
+            });
+        }
+
+        function toggleTheme() {
+            isLightMode = !isLightMode;
+            localStorage.setItem('finSightTheme', isLightMode ? 'light' : 'dark');
+            document.body.classList.toggle('light-mode', isLightMode);
+            document.querySelector('#themeToggle i').className = isLightMode ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
+            updateTexts();
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('finSightLang', currentLang);
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = currentLang;
+            document.querySelector('#langToggle span').innerText = currentLang === 'ar' ? 'English' : 'العربية';
+            updateTexts();
+            
+            if (financialData.length > 0) {
+                buildAllStatements();
+            }
+        }
+
+        // سحب البيانات ومعالجتها وبناء الفلتر ديناميكياً
+        function loadAndProcessFinancialData() {
+            const raw = localStorage.getItem('financialData');
+            if (!raw) {
+                document.getElementById('noDataBox').style.display = 'block';
+                document.getElementById('activeReportsArea').style.display = 'none';
+                return;
+            }
+
+            financialData = JSON.parse(raw);
+            document.getElementById('noDataBox').style.display = 'none';
+            document.getElementById('activeReportsArea').style.display = 'block';
+
+            // العثور على مفاتيح السنة والشهر والبيانات من الأعمدة
+            const keys = Object.keys(financialData[0]);
+            const yearKey = keys.find(k => k.includes('سنة') || k.toLowerCase().includes('year')) || keys[0];
+            const monthKey = keys.find(k => k.includes('شهر') || k.toLowerCase().includes('month')) || keys[1];
+
+            const yearsSet = new Set();
+            const monthsSet = new Set();
+
+            financialData.forEach(row => {
+                if (row[yearKey]) yearsSet.add(row[yearKey].toString());
+                if (row[monthKey]) monthsSet.add(row[monthKey].toString());
+            });
+
+            availableYears = Array.from(yearsSet).sort((a,b) => b-a);
+            availableMonths = Array.from(monthsSet).sort((a,b) => a-b);
+
+            const selectYear = document.getElementById('selectYear');
+            const selectMonth = document.getElementById('selectMonth');
+
+            selectYear.innerHTML = '';
+            selectMonth.innerHTML = '';
+
+            availableYears.forEach(y => {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.innerText = y;
+                selectYear.appendChild(opt);
+            });
+
+            availableMonths.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.innerText = getMonthName(m);
+                selectMonth.appendChild(opt);
+            });
+
+            selectedYear = availableYears[0];
+            selectedMonth = availableMonths[0];
+
+            buildAllStatements();
+        }
+
+        // زر التحميل التلقائي لميزان المراجعة التجريبي لتسهيل تجربة العميل فوراً
+        function loadDemoFinancialData() {
+            const demoData = [
+                // ميزان مراجعة الشهر الأول (يناير 2026)
+                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "1001", "اسم الحساب (Account Name)": "رأس المال المساهم", "المدين (Debit)": 0, "الدائن (Credit)": 500000, "تصنيف الحساب (Classification)": "حقوق ملكية - رأس المال"},
+                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "1101", "اسم الحساب (Account Name)": "نقدية بالصندوق ولدى البنوك", "المدين (Debit)": 400000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "أصول متداولة - نقدية بالبنوك"},
+                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "1201", "اسم الحساب (Account Name)": "أصول ثابتة - آلات ومعدات", "المدين (Debit)": 150000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "أصول غير متداولة - أصول ثابتة"},
+                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "1301", "اسم الحساب (Account Name)": "قروض بنكية طويلة الأجل", "المدين (Debit)": 0, "الدائن (Credit)": 50000, "تصنيف الحساب (Classification)": "التزامات غير متداولة"},
+                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "1401", "اسم الحساب (Account Name)": "مخزون بضاعة أول المدة", "المدين (Debit)": 30000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "أصول متداولة - مخزون"},
+                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "1501", "اسم الحساب (Account Name)": "موردين وذمم دائنة تجارية", "المدين (Debit)": 0, "الدائن (Credit)": 30000, "تصنيف الحساب (Classification)": "التزامات متداولة - موردين"},
+                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "4001", "اسم الحساب (Account Name)": "إيرادات مبيعات السلع والخدمات", "المدين (Debit)": 0, "الدائن (Credit)": 100000, "تصنيف الحساب (Classification)": "إيرادات"},
+                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "5001", "اسم الحساب (Account Name)": "تكلفة المبيعات والبضاعة المباعة", "المدين (Debit)": 60000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "تكلفة المبيعات"},
+                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "6001", "اسم الحساب (Account Name)": "رواتب ومصاريف إدارية وعمومية", "المدين (Debit)": 1500000/100, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "مصاريف إدارية وعمومية"},
+                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "7001", "اسم الحساب (Account Name)": "مصاريف بنكية وتمويلية", "المدين (Debit)": 5000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "مصاريف تمويلية"},
+                
+                // ميزان مراجعة الشهر الثاني (فبراير 2026) لتجربة الفلاتر والمقارنات
+                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "1001", "اسم الحساب (Account Name)": "رأس المال المساهم", "المدين (Debit)": 0, "الدائن (Credit)": 500000, "تصنيف الحساب (Classification)": "حقوق ملكية - رأس المال"},
+                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "1101", "اسم الحساب (Account Name)": "نقدية بالصندوق ولدى البنوك", "المدين (Debit)": 426000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "أصول متداولة - نقدية بالبنوك"},
+                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "1201", "اسم الحساب (Account Name)": "أصول ثابتة - آلات ومعدات", "المدين (Debit)": 150000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "أصول غير متداولة - أصول ثابتة"},
+                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "1301", "اسم الحساب (Account Name)": "قروض بنكية طويلة الأجل", "المدين (Debit)": 0, "الدائن (Credit)": 50000, "تصنيف الحساب (Classification)": "التزامات غير متداولة"},
+                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "1401", "اسم الحساب (Account Name)": "مخزون بضاعة أول المدة", "المدين (Debit)": 30000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "أصول متداولة - مخزون"},
+                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "1501", "اسم الحساب (Account Name)": "موردين وذمم دائنة تجارية", "المدين (Debit)": 0, "الدائن (Credit)": 30000, "تصنيف الحساب (Classification)": "التزامات متداولة - موردين"},
+                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "4001", "اسم الحساب (Account Name)": "إيرادات مبيعات السلع والخدمات", "المدين (Debit)": 0, "الدائن (Credit)": 120000, "تصنيف الحساب (Classification)": "إيرادات"},
+                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "5001", "اسم الحساب (Account Name)": "تكلفة المبيعات والبضاعة المباعة", "المدين (Debit)": 70000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "تكلفة المبيعات"},
+                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "6001", "اسم الحساب (Account Name)": "رواتب ومصاريف إدارية وعمومية", "المدين (Debit)": 20000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "مصاريف إدارية وعمومية"},
+                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "7001", "اسم الحساب (Account Name)": "مصاريف بنكية وتمويلية", "المدين (Debit)": 4000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "مصاريف تمويلية"}
+            ];
+
+            localStorage.setItem('financialData', JSON.stringify(demoData));
+            showToast(currentLang === 'ar' ? 'تم تنزيل البيانات التجريبية وبناء القوائم بنجاح!' : 'Demo data loaded successfully!');
+            loadAndProcessFinancialData();
+        }
+
+        function getMonthName(m) {
+            const monthsAr = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
+            const monthsEn = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const idx = parseInt(m) - 1;
+            if (idx >= 0 && idx < 12) {
+                return currentLang === 'ar' ? `${m} - ${monthsAr[idx]}` : `${m} - ${monthsEn[idx]}`;
+            }
+            return m;
+        }
+
+        function switchTab(evt, tabId) {
+            const tabs = document.querySelectorAll('.statement-card');
+            tabs.forEach(t => t.classList.remove('active'));
+
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            tabBtns.forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+
+        function onPeriodChange() {
+            selectedYear = document.getElementById('selectYear').value;
+            selectedMonth = document.getElementById('selectMonth').value;
+            buildAllStatements();
+        }
+
+        // معالجة واحتساب وبناء القوائم المالية الأربعة
+        function buildAllStatements() {
+            const periodStr = currentLang === 'ar'
+                ? `عن الفترة المنتهية في شهر ${getMonthName(selectedMonth)} لسنة ${selectedYear} (أرقام شهرية صافية)`
+                : `For the period ended in ${getMonthName(selectedMonth)} ${selectedYear} (Monthly Net Figures)`;
+
+            const bsPeriodStr = currentLang === 'ar'
+                ? `كما في نهاية شهر ${getMonthName(selectedMonth)} لسنة ${selectedYear} (تراكمي)`
+                : `As of the end of ${getMonthName(selectedMonth)} ${selectedYear} (Cumulative)`;
+
+            document.getElementById('incPeriod').innerText = periodStr;
+            document.getElementById('balPeriod').innerText = bsPeriodStr;
+            document.getElementById('cfPeriod').innerText = periodStr;
+            document.getElementById('eqPeriod').innerText = periodStr;
+
+            const keys = Object.keys(financialData[0]);
+            const yearKey = keys.find(k => k.includes('سنة') || k.toLowerCase().includes('year')) || keys[0];
+            const monthKey = keys.find(k => k.includes('شهر') || k.toLowerCase().includes('month')) || keys[1];
+            const debitKey = keys.find(k => k.includes('مدين') || k.toLowerCase().includes('debit')) || keys[5];
+            const creditKey = keys.find(k => k.includes('دائن') || k.toLowerCase().includes('credit')) || keys[6];
+            const classKey = keys.find(k => k.includes('تصنيف') || k.toLowerCase().includes('class') || k.includes('IFRS')) || keys[4];
+
+            // 1. تصفية للشهر الحالي فقط لقائمة الدخل
+            const currentPeriodRows = financialData.filter(row => 
+                row[yearKey].toString() === selectedYear.toString() && 
+                row[monthKey].toString() === selectedMonth.toString()
+            );
+
+            // 2. تصفية تراكمية حتى الشهر الحالي للميزانية الختامية
+            const cumulativeRows = financialData.filter(row => 
+                row[yearKey].toString() === selectedYear.toString() && 
+                parseInt(row[monthKey]) <= parseInt(selectedMonth)
+            );
+
+            // حساب أرقام قائمة الدخل
+            let revenue = 0;
+            let costOfSales = 0;
+            let sga = 0;
+            let financeCosts = 0;
+
+            currentPeriodRows.forEach(row => {
+                const cls = row[classKey] || '';
+                const d = parseFloat(row[debitKey]) || 0;
+                const c = parseFloat(row[creditKey]) || 0;
+
+                if (cls === 'إيرادات') revenue += (c - d);
+                if (cls === 'تكلفة المبيعات') costOfSales += (d - c);
+                if (cls === 'مصاريف إدارية وعمومية') sga += (d - c);
+                if (cls === 'مصاريف تمويلية') financeCosts += (d - c);
+            });
+
+            const grossProfit = revenue - costOfSales;
+            const operatingProfit = grossProfit - sga;
+            const netIncome = operatingProfit - financeCosts;
+
+            // حساب أرقام الميزانية التراكمية
+            let ppe = 0;
+            let cash = 0;
+            let rec = 0;
+            let inv = 0;
+            let otherAssets = 0;
+            let cap = 0;
+            let retEarnings = 0;
+            let nonCurLiab = 0;
+            let payables = 0;
+            let otherLiab = 0;
+
+            let cumulativeNetIncome = 0;
+            let cumRev = 0, cumCos = 0, cumSga = 0, cumFin = 0;
+
+            cumulativeRows.forEach(row => {
+                const cls = row[classKey] || '';
+                const d = parseFloat(row[debitKey]) || 0;
+                const c = parseFloat(row[creditKey]) || 0;
+
+                if (cls === 'أصول غير متداولة - أصول ثابتة') ppe += (d - c);
+                if (cls === 'أصول متداولة - نقدية بالبنوك') cash += (d - c);
+                if (cls === 'أصول متداولة - عملاء') rec += (d - c);
+                if (cls === 'أصول متداولة - مخزون') inv += (d - c);
+                if (cls === 'أصول متداولة - أخرى') otherAssets += (d - c);
+                
+                if (cls === 'حقوق ملكية - رأس المال') cap += (c - d);
+                if (cls === 'حقوق ملكية - أرباح مبقاة') retEarnings += (c - d);
+                if (cls === 'التزامات غير متداولة') nonCurLiab += (c - d);
+                if (cls === 'التزامات متداولة - موردين') payables += (c - d);
+                if (cls === 'التزامات متداولة - أخرى') otherLiab += (c - d);
+
+                if (cls === 'إيرادات') cumRev += (c - d);
+                if (cls === 'تكلفة المبيعات') cumCos += (d - c);
+                if (cls === 'مصاريف إدارية وعمومية') cumSga += (d - c);
+                if (cls === 'مصاريف تمويلية') cumFin += (d - c);
+            });
+
+            cumulativeNetIncome = cumRev - cumCos - cumSga - cumFin;
+
+            const totalCurrentAssets = cash + rec + inv + otherAssets;
+            const totalNonCurrentAssets = ppe;
+            const totalAssets = totalCurrentAssets + totalNonCurrentAssets;
+
+            const totalCurrentLiabilities = payables + otherLiab;
+            const totalLiabilities = totalCurrentLiabilities + nonCurLiab;
+            const totalEquity = cap + retEarnings + cumulativeNetIncome;
+            const totalLiabilitiesAndEquity = totalLiabilities + totalEquity;
+
+            renderIncomeStatement(revenue, costOfSales, grossProfit, sga, operatingProfit, financeCosts, netIncome);
+            renderBalanceSheet(ppe, cash, rec, inv, otherAssets, totalCurrentAssets, totalAssets, cap, retEarnings, cumulativeNetIncome, totalEquity, nonCurLiab, payables, otherLiab, totalCurrentLiabilities, totalLiabilities, totalLiabilitiesAndEquity);
+            renderCashFlowStatement(netIncome, cumulativeRows, debitKey, creditKey, classKey, cash);
+            renderEquityStatement(cap, retEarnings, cumulativeNetIncome, totalEquity);
+        }
+
+        // رسم قائمة الدخل
+        function renderIncomeStatement(rev, cos, gp, sga, op, fin, net) {
+            const body = document.getElementById('incomeTableBody');
+            body.innerHTML = '';
+
+            const items = currentLang === 'ar' ? [
+                { name: "إيرادات المبيعات والنشاط الشاملة", amount: rev, type: "item" },
+                { name: "يخصم: تكلفة المبيعات المباشرة", amount: -cos, type: "item" },
+                { name: "مجمل أرباح النشاط (Gross Profit)", amount: gp, type: "subtotal" },
+                { name: "يخصم: مصاريف إدارية وعمومية وتشغيلية", amount: -sga, type: "item" },
+                { name: "أرباح التشغيل قبل الفوائد والضرائب (EBIT)", amount: op, type: "subtotal" },
+                { name: "يخصم: مصاريف تمويلية وعمولات بنكية", amount: -fin, type: "item" },
+                { name: "صافي أرباح / (خسائر) الفترة الشاملة", amount: net, type: "total" }
+            ] : [
+                { name: "Revenue / Sales Turnover", amount: rev, type: "item" },
+                { name: "Less: Cost of Sales (Direct Costs)", amount: -cos, type: "item" },
+                { name: "Gross Profit", amount: gp, type: "subtotal" },
+                { name: "Less: Selling, General & Administrative Expenses", amount: -sga, type: "item" },
+                { name: "Operating Profit (EBIT)", amount: op, type: "subtotal" },
+                { name: "Less: Finance Costs / Bank Fees", amount: -fin, type: "item" },
+                { name: "Net Income / (Loss) for the Period", amount: net, type: "total" }
+            ];
+
+            items.forEach(it => {
+                const tr = document.createElement('tr');
+                if (it.type === 'subtotal') tr.className = 'row-subtotal';
+                if (it.type === 'total') tr.className = 'row-total';
+
+                const tdName = document.createElement('td');
+                tdName.innerText = it.name;
+
+                const tdAmount = document.createElement('td');
+                tdAmount.className = 'text-num';
+                tdAmount.innerText = formatNumber(it.amount);
+                if (it.amount < 0) tdAmount.classList.add('variance-negative');
+
+                tr.appendChild(tdName);
+                tr.appendChild(tdAmount);
+                body.appendChild(tr);
+            });
+        }
+
+        // رسم الميزانية وفحص الاتزان تلقائياً
+        function renderBalanceSheet(ppe, cash, rec, inv, otherAssets, totCurAssets, totAssets, cap, ret, net, totEq, nonCurLiab, pay, otherLiab, totCurLiab, totLiab, totLiabEq) {
+            const body = document.getElementById('balanceTableBody');
+            body.innerHTML = '';
+
+            const isBalanced = Math.abs(totAssets - totLiabEq) < 1.0;
+            const badge = document.getElementById('balanceStatusBadge');
+            const statusText = document.getElementById('balanceStatusText');
+
+            if (isBalanced) {
+                badge.className = "balance-check-badge badge-balanced";
+                statusText.innerText = currentLang === 'ar' ? "الميزانية متزنة بدقة 100% (Assets = Liabilities + Equity)" : "Balance Sheet is perfectly balanced!";
+            } else {
+                badge.className = "balance-check-badge badge-unbalanced";
+                const diff = Math.abs(totAssets - totLiabEq);
+                statusText.innerText = currentLang === 'ar' 
+                    ? `الميزانية غير متزنة! الفارق: ${formatNumber(diff)} USD`
+                    : `Balance Sheet is not balanced! Difference: ${formatNumber(diff)} USD`;
+            }
+
+            const items = currentLang === 'ar' ? [
+                { name: "أصول غير متداولة (Non-Current Assets)", amount: null, type: "category" },
+                { name: "أصول ثابتة وآلات ومعدات صافية (PPE)", amount: ppe, type: "indent" },
+                { name: "إجمالي أصول غير متداولة", amount: ppe, type: "subtotal" },
+                
+                { name: "أصول متداولة (Current Assets)", amount: null, type: "category" },
+                { name: "مخزون بضاعة آخر المدة", amount: inv, type: "indent" },
+                { name: "العملاء والذمم والمدينون", amount: rec, type: "indent" },
+                { name: "نقدية بالبنوك والصناديق", amount: cash, type: "indent" },
+                { name: "أصول متداولة أخرى وأرصدة مدينة", amount: otherAssets, type: "indent" },
+                { name: "إجمالي الأصول المتداولة", amount: totCurAssets, type: "subtotal" },
+                
+                { name: "إجمالي الأصول الختامية", amount: totAssets, type: "total" },
+                
+                { name: "حقوق الملكية (Equity)", amount: null, type: "category" },
+                { name: "رأس المال المدفوع والمصرح", amount: cap, type: "indent" },
+                { name: "أرباح مبقاة من الفترات السابقة", amount: ret, type: "indent" },
+                { name: "صافي أرباح العام الحالي التراكمية", amount: net, type: "indent" },
+                { name: "إجمالي حقوق الملكية الختامية", amount: totEq, type: "subtotal" },
+                
+                { name: "التزامات غير متداولة (طويلة الأجل)", amount: nonCurLiab, type: "subtotal" },
+                
+                { name: "التزامات متداولة (قصيرة الأجل)", amount: null, type: "category" },
+                { name: "الموردين والذمم الدائنة", amount: pay, type: "indent" },
+                { name: "التزامات متداولة أخرى ومستحقات", amount: otherLiab, type: "indent" },
+                { name: "إجمالي الالتزامات المتداولة", amount: totCurLiab, type: "subtotal" },
+                
+                { name: "إجمالي الالتزامات الختامية", amount: totLiab, type: "subtotal" },
+                { name: "إجمالي حقوق الملكية والالتزامات", amount: totLiabEq, type: "total" }
+            ] : [
+                { name: "Non-Current Assets", amount: null, type: "category" },
+                { name: "Property, Plant & Equipment (PPE)", amount: ppe, type: "indent" },
+                { name: "Total Non-Current Assets", amount: ppe, type: "subtotal" },
+                
+                { name: "Current Assets", amount: null, type: "category" },
+                { name: "Inventories", amount: inv, type: "indent" },
+                { name: "Trade and Other Receivables", amount: rec, type: "indent" },
+                { name: "Cash and Cash Equivalents", amount: cash, type: "indent" },
+                { name: "Other Current Assets", amount: otherAssets, type: "indent" },
+                { name: "Total Current Assets", amount: totCurAssets, type: "subtotal" },
+                
+                { name: "TOTAL ASSETS", amount: totAssets, type: "total" },
+                
+                { name: "Equity", amount: null, type: "category" },
+                { name: "Share Capital Paid-up", amount: cap, type: "indent" },
+                { name: "Retained Earnings (Prior Years)", amount: ret, type: "indent" },
+                { name: "Current Period Net Earnings", amount: net, type: "indent" },
+                { name: "Total Equity", amount: totEq, type: "subtotal" },
+                
+                { name: "Non-Current Liabilities", amount: nonCurLiab, type: "subtotal" },
+                
+                { name: "Current Liabilities", amount: null, type: "category" },
+                { name: "Trade and Other Payables", amount: pay, type: "indent" },
+                { name: "Other Current Liabilities", amount: otherLiab, type: "indent" },
+                { name: "Total Current Liabilities", amount: totCurLiab, type: "subtotal" },
+                
+                { name: "Total Liabilities", amount: totLiab, type: "subtotal" },
+                { name: "TOTAL EQUITY AND LIABILITIES", amount: totLiabEq, type: "total" }
+            ];
+
+            items.forEach(it => {
+                const tr = document.createElement('tr');
+                if (it.type === 'category') tr.className = 'row-category';
+                if (it.type === 'indent') tr.style.paddingInlineStart = '40px';
+                if (it.type === 'subtotal') tr.className = 'row-subtotal';
+                if (it.type === 'total') tr.className = 'row-total';
+
+                const tdName = document.createElement('td');
+                tdName.innerText = it.name;
+                if (it.type === 'indent') tdName.className = 'row-indent';
+
+                const tdAmount = document.createElement('td');
+                tdAmount.className = 'text-num';
+                tdAmount.innerText = it.amount === null ? '' : formatNumber(it.amount);
+                if (it.amount < 0) tdAmount.classList.add('variance-negative');
+
+                tr.appendChild(tdName);
+                tr.appendChild(tdAmount);
+                body.appendChild(tr);
+            });
+        }
+
+        // رسم التدفقات النقدية
+        function renderCashFlowStatement(netIncome, cumulativeRows, debitKey, creditKey, classKey, currentCash) {
+            const body = document.getElementById('cfTableBody');
+            body.innerHTML = '';
+
+            const prevMonth = parseInt(selectedMonth) - 1;
+            const prevPeriodRows = prevMonth > 0 ? financialData.filter(row => 
+                row[Object.keys(row).find(k => k.includes('سنة') || k.toLowerCase().includes('year'))].toString() === selectedYear.toString() && 
+                parseInt(row[Object.keys(row).find(k => k.includes('شهر') || k.toLowerCase().includes('month'))]) <= prevMonth
+            ) : [];
+
+            let prevRec = 0, prevInv = 0, prevPay = 0, prevPPE = 0;
+            prevPeriodRows.forEach(row => {
+                const cls = row[classKey] || '';
+                const d = parseFloat(row[debitKey]) || 0;
+                const c = parseFloat(row[creditKey]) || 0;
+                if (cls === 'أصول متداولة - عملاء') prevRec += (d - c);
+                if (cls === 'أصول متداولة - مخزون') prevInv += (d - c);
+                if (cls === 'التزامات متداولة - موردين') prevPay += (c - d);
+                if (cls === 'أصول غير متداولة - أصول ثابتة') prevPPE += (d - c);
+            });
+
+            let currRec = 0, currInv = 0, currPay = 0, currPPE = 0;
+            cumulativeRows.forEach(row => {
+                const cls = row[classKey] || '';
+                const d = parseFloat(row[debitKey]) || 0;
+                const c = parseFloat(row[creditKey]) || 0;
+                if (cls === 'أصول متداولة - عملاء') currRec += (d - c);
+                if (cls === 'أصول متداولة - مخزون') currInv += (d - c);
+                if (cls === 'التزامات متداولة - موردين') currPay += (c - d);
+                if (cls === 'أصول غير متداولة - أصول ثابتة') currPPE += (d - c);
+            });
+
+            const dRec = currRec - prevRec;
+            const dInv = currInv - prevInv;
+            const dPay = currPay - prevPay;
+            const dPPE = currPPE - prevPPE;
+
+            const cfOperating = netIncome - dRec - dInv + dPay;
+            const cfInvesting = -dPPE;
+            const cfFinancing = 0;
+
+            const netIncrease = cfOperating + cfInvesting + cfFinancing;
+            const cashAtStart = currentCash - netIncrease;
+
+            const items = currentLang === 'ar' ? [
+                { name: "أنشطة التشغيل (Operating Activities)", amount: null, type: "category" },
+                { name: "صافي ربح الفترة المالي الشامل", amount: netIncome, type: "indent" },
+                { name: "التغير في العملاء والذمم المدينة", amount: -dRec, type: "indent" },
+                { name: "التغير في مخزون البضاعة", amount: -dInv, type: "indent" },
+                { name: "التغير في الموردين والذمم الدائنة", amount: dPay, type: "indent" },
+                { name: "صافي النقدية المتدفقة من أنشطة التشغيل", amount: cfOperating, type: "subtotal" },
+                
+                { name: "أنشطة الاستثمار (Investing Activities)", amount: null, type: "category" },
+                { name: "مدفوعات لشراء أصول ثابتة ومعدات", amount: -dPPE, type: "indent" },
+                { name: "صافي النقدية المستخدمة في الأنشطة الاستثمارية", amount: cfInvesting, type: "subtotal" },
+                
+                { name: "صافي التغير في النقدية وما يعادلها", amount: netIncrease, type: "subtotal" },
+                { name: "النقدية في بداية الفترة المالية", amount: cashAtStart, type: "indent" },
+                { name: "النقدية في نهاية الفترة المالية", amount: currentCash, type: "total" }
+            ] : [
+                { name: "Operating Activities", amount: null, type: "category" },
+                { name: "Net Profit / Income for the Period", amount: netIncome, type: "indent" },
+                { name: "Change in Trade & Other Receivables", amount: -dRec, type: "indent" },
+                { name: "Change in Inventories / Stocks", amount: -dInv, type: "indent" },
+                { name: "Change in Trade & Other Payables", amount: dPay, type: "indent" },
+                { name: "Net Cash Flow from Operating Activities", amount: cfOperating, type: "subtotal" },
+                
+                { name: "Investing Activities", amount: null, type: "category" },
+                { name: "Payments for Property, Plant & Equipment (CapEx)", amount: -dPPE, type: "indent" },
+                { name: "Net Cash Used in Investing Activities", amount: cfInvesting, type: "subtotal" },
+                
+                { name: "Net Increase / (Decrease) in Cash", amount: netIncrease, type: "subtotal" },
+                { name: "Cash & Equivalents at Beginning of Period", amount: cashAtStart, type: "indent" },
+                { name: "Cash & Equivalents at End of Period", amount: currentCash, type: "total" }
+            ];
+
+            items.forEach(it => {
+                const tr = document.createElement('tr');
+                if (it.type === 'category') tr.className = 'row-category';
+                if (it.type === 'subtotal') tr.className = 'row-subtotal';
+                if (it.type === 'total') tr.className = 'row-total';
+
+                const tdName = document.createElement('td');
+                tdName.innerText = it.name;
+                if (it.type === 'indent') tdName.className = 'row-indent';
+
+                const tdAmount = document.createElement('td');
+                tdAmount.className = 'text-num';
+                tdAmount.innerText = it.amount === null ? '' : formatNumber(it.amount);
+                if (it.amount < 0) tdAmount.classList.add('variance-negative');
+
+                tr.appendChild(tdName);
+                tr.appendChild(tdAmount);
+                body.appendChild(tr);
+            });
+        }
+
+        // رسم حقوق الملكية
+        function renderEquityStatement(cap, ret, currentNet, totalEq) {
+            const body = document.getElementById('eqTableBody');
+            body.innerHTML = '';
+
+            const priorRet = ret;
+            const items = currentLang === 'ar' ? [
+                { name: "رأس المال المساهم (بداية الفترة)", amount: cap, type: "indent" },
+                { name: "حركة رأس المال المساهم المضافة خلال الفترة", amount: 0, type: "indent" },
+                { name: "رأس المال المساهم الختامي", amount: cap, type: "subtotal" },
+                
+                { name: "أرباح مبقاة مدورة (بداية الفترة)", amount: priorRet, type: "indent" },
+                { name: "يضاف: صافي ربح الفترة المالية الحالية", amount: currentNet, type: "indent" },
+                { name: "أرباح مبقاة ختامية ومحققة", amount: priorRet + currentNet, type: "subtotal" },
+                
+                { name: "إجمالي حقوق الملكية الختامية", amount: totalEq, type: "total" }
+            ] : [
+                { name: "Share Capital (Beginning Balance)", amount: cap, type: "indent" },
+                { name: "Changes / Additions to Capital during the Period", amount: 0, type: "indent" },
+                { name: "Share Capital (Ending Balance)", amount: cap, type: "subtotal" },
+                
+                { name: "Retained Earnings (Beginning Balance)", amount: priorRet, type: "indent" },
+                { name: "Add: Net Profit/Loss for the Current Period", amount: currentNet, type: "indent" },
+                { name: "Retained Earnings (Ending Balance)", amount: priorRet + currentNet, type: "subtotal" },
+                
+                { name: "TOTAL ENDING EQUITY", amount: totalEq, type: "total" }
+            ];
+
+            items.forEach(it => {
+                const tr = document.createElement('tr');
+                if (it.type === 'subtotal') tr.className = 'row-subtotal';
+                if (it.type === 'total') tr.className = 'row-total';
+
+                const tdName = document.createElement('td');
+                tdName.innerText = it.name;
+                if (it.type === 'indent') tdName.className = 'row-indent';
+
+                const tdAmount = document.createElement('td');
+                tdAmount.className = 'text-num';
+                tdAmount.innerText = formatNumber(it.amount);
+                if (it.amount < 0) tdAmount.classList.add('variance-negative');
+
+                tr.appendChild(tdName);
+                tr.appendChild(tdAmount);
+                body.appendChild(tr);
+            });
+        }
+
+        function formatNumber(value) {
+            const num = parseFloat(value);
+            if (isNaN(num)) return '0.00';
+            return num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+</html>

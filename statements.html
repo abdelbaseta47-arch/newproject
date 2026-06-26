@@ -194,7 +194,7 @@
         /* حاوية التقارير - تم التوسعة لتشمل أعمدة المقارنة */
         .statements-container {
             padding: 40px;
-            max-width: 1400px; /* تم التكبير من 1200 إلى 1400 */
+            max-width: 1400px;
             margin: 0 auto;
             width: 100%;
             flex-grow: 1;
@@ -221,7 +221,7 @@
             color: var(--text-title);
         }
 
-        /* شريط التصفية والفلترة للوقت والتحميل */
+        /* شريط التصفية والفلترة للوقت والتصدير */
         .filter-bar {
             background-color: var(--bg-surface);
             border: 1px solid var(--border-color);
@@ -772,11 +772,11 @@
                         <table class="accounting-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 36%;" data-i18n="colItem">البند المالي</th>
+                                    <th style="width: 36%;">البند المالي</th>
                                     <th style="width: 16%;" class="text-num-header" id="incHeaderCurrent">الفترة الحالية</th>
                                     <th style="width: 16%;" class="text-num-header" id="incHeaderPrevious">الفترة السابقة</th>
-                                    <th style="width: 16%;" class="text-num-header" data-i18n="colVariance">التغير</th>
-                                    <th style="width: 16%;" class="text-num-header" data-i18n="colVariancePct">نسبة التغير %</th>
+                                    <th style="width: 16%;" class="text-num-header">التغير</th>
+                                    <th style="width: 16%;" class="text-num-header">نسبة التغير %</th>
                                 </tr>
                             </thead>
                             <tbody id="incomeTableBody">
@@ -800,11 +800,11 @@
                         <table class="accounting-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 36%;" data-i18n="colItem">البند المالي</th>
+                                    <th style="width: 36%;">البند المالي</th>
                                     <th style="width: 16%;" class="text-num-header" id="balHeaderCurrent">الفترة الحالية</th>
                                     <th style="width: 16%;" class="text-num-header" id="balHeaderPrevious">الفترة السابقة</th>
-                                    <th style="width: 16%;" class="text-num-header" data-i18n="colVariance">التغير</th>
-                                    <th style="width: 16%;" class="text-num-header" data-i18n="colVariancePct">نسبة التغير %</th>
+                                    <th style="width: 16%;" class="text-num-header">التغير</th>
+                                    <th style="width: 16%;" class="text-num-header">نسبة التغير %</th>
                                 </tr>
                             </thead>
                             <tbody id="balanceTableBody">
@@ -825,8 +825,8 @@
                         <table class="accounting-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 68%;" data-i18n="colItem">البند المالي</th>
-                                    <th style="width: 32%;" class="text-num-header" data-i18n="colAmount">المبلغ (USD)</th>
+                                    <th style="width: 68%;">البند المالي</th>
+                                    <th style="width: 32%;" class="text-num-header">المبلغ (USD)</th>
                                 </tr>
                             </thead>
                             <tbody id="cfTableBody">
@@ -847,8 +847,8 @@
                         <table class="accounting-table">
                             <thead>
                                 <tr>
-                                    <th style="width: 68%;" data-i18n="colItem">البند المالي</th>
-                                    <th style="width: 32%;" class="text-num-header" data-i18n="colAmount">المبلغ (USD)</th>
+                                    <th style="width: 68%;">البند المالي</th>
+                                    <th style="width: 32%;" class="text-num-header">المبلغ (USD)</th>
                                 </tr>
                             </thead>
                             <tbody id="eqTableBody">
@@ -1044,13 +1044,14 @@
             return isNaN(num) ? 0 : num;
         }
 
+        // محاذاة مرنة وذكية ثنائية اللغة لضمان قراءة وتصنيف الحسابات 
         function normalizeClassification(cls) {
             if (!cls) return '';
             const s = cls.toString().trim().toLowerCase();
             
             if (s.includes('إيرادات') || s.includes('ايرادات') || s.includes('sales') || s.includes('revenue') || s.includes('turnover')) return 'revenue';
-            if (s.includes('تكلفة المبيعات') || s.includes('تكلفه المبيعات') || s.includes('cogs') || s.includes('cost of sales')) return 'cost_of_sales';
-            if (s.includes('إدارية') || s.includes('عمومية') || s.includes('sga') || s.includes('administrative') || s.includes('operating expenses') || s.includes('مصاريف')) {
+            if (s.includes('تكلفة المبيعات') || s.includes('تكلفه المبيعات') || s.includes('cogs') || s.includes('cost of sales') || s.includes('cost_of_sales')) return 'cost_of_sales';
+            if (s.includes('إدارية') || s.includes('عمومية') || s.includes('sga') || s.includes('administrative') || s.includes('operating expenses') || s.includes('مصاريف إدارية ועمومية') || s.includes('مصاريف إدارية وعمومية')) {
                 if (s.includes('تمويلية') || s.includes('تمويليه') || s.includes('finance') || s.includes('interest')) return 'finance_costs';
                 return 'sga';
             }
@@ -1059,7 +1060,7 @@
             if (s.includes('نقدية') || s.includes('نقديه') || s.includes('بنوك') || s.includes('صندوق') || s.includes('cash') || s.includes('bank')) return 'cash';
             if (s.includes('عملاء') || s.includes('العملاء') || s.includes('ذمم مدينة') || s.includes('receivable')) return 'receivables';
             if (s.includes('مخزون') || s.includes('المخزون') || s.includes('بضاعة') || s.includes('inventory')) return 'inventory';
-            if (s.includes('أصول متداولة أخرى') || s.includes('اصول متداولة اخرى') || s.includes('other current assets')) return 'other_current_assets';
+            if (s.includes('أصول متداولة أخرى') || s.includes('اصول متداولة اخرى') || s.includes('other current assets') || s.includes('أخرى') && s.includes('أصول')) return 'other_current_assets';
             if (s.includes('رأس المال') || s.includes('راس المال') || s.includes('capital') || s.includes('equity')) return 'capital';
             if (s.includes('أرباح مبقاة') || s.includes('ارباح مبقاة') || s.includes('retained earnings') || s.includes('prior years')) return 'retained_earnings';
             if (s.includes('التزامات غير متداولة') || s.includes('طويلة الأجل') || s.includes('non-current liabilities') || s.includes('loans')) return 'non_current_liabilities';
@@ -1134,28 +1135,28 @@
         function loadDemoFinancialData() {
             const demoData = [
                 // ميزان مراجعة الشهر الأول (يناير 2026)
-                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "1001", "اسم الحساب (Account Name)": "رأس المال المساهم", "المدين (Debit)": 0, "الدائن (Credit)": 500000, "تصنيف الحساب (Classification)": "حقوق ملكية - رأس المال"},
-                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "1101", "اسم الحساب (Account Name)": "نقدية بالصندوق ولدى البنوك", "المدين (Debit)": 400000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "أصول متداولة - نقدية بالبنوك"},
-                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "1201", "اسم الحساب (Account Name)": "أصول ثابتة - آلات ومعدات", "المدين (Debit)": 150000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "أصول غير متداولة - أصول ثابتة"},
-                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "1301", "اسم الحساب (Account Name)": "قروض بنكية طويلة الأجل", "المدين (Debit)": 0, "الدائن (Credit)": 50000, "تصنيف الحساب (Classification)": "التزامات غير متداولة"},
-                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "1401", "اسم الحساب (Account Name)": "مخزون بضاعة أول المدة", "المدين (Debit)": 30000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "أصول متداولة - مخزون"},
-                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "1501", "اسم الحساب (Account Name)": "موردين وذمم دائنة تجارية", "المدين (Debit)": 0, "الدائن (Credit)": 30000, "تصنيف الحساب (Classification)": "التزامات متداولة - موردين"},
-                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "4001", "اسم الحساب (Account Name)": "إيرادات مبيعات السلع والخدمات", "المدين (Debit)": 0, "الدائن (Credit)": 100000, "تصنيف الحساب (Classification)": "إيرادات"},
-                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "5001", "اسم الحساب (Account Name)": "تكلفة المبيعات والبضاعة المباعة", "المدين (Debit)": 60000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "تكلفة المبيعات"},
-                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "6001", "اسم الحساب (Account Name)": "رواتب ومصاريف إدارية وعمومية", "المدين (Debit)": 15000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "مصاريف إدارية وعمومية"},
-                {"السنة (Year)": "2026", "الشهر (Month)": "1", "كود الحساب (Account Code)": "7001", "اسم الحساب (Account Name)": "مصاريف بنكية وتمويلية", "المدين (Debit)": 5000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "مصاريف تمويلية"},
+                {"السنة": "2026", "الشهر": "1", "كود الحساب": "1001", "اسم الحساب": "رأس المال المساهم", "المدين": 0, "الدائن": 500000, "تصنيف الحساب (Classification)": "حقوق ملكية - رأس المال"},
+                {"السنة": "2026", "الشهر": "1", "كود الحساب": "1101", "اسم الحساب": "نقدية بالصندوق ولدى البنوك", "المدين": 400000, "الدائن": 0, "تصنيف الحساب (Classification)": "أصول متداولة - نقدية بالبنوك"},
+                {"السنة": "2026", "الشهر": "1", "كود الحساب": "1201", "اسم الحساب": "أصول ثابتة - آلات ومعدات", "المدين": 150000, "الدائن": 0, "تصنيف الحساب (Classification)": "أصول غير متداولة - أصول ثابتة"},
+                {"السنة": "2026", "الشهر": "1", "كود الحساب": "1301", "اسم الحساب": "قروض بنكية طويلة الأجل", "المدين": 0, "الدائن": 50000, "تصنيف الحساب (Classification)": "التزامات غير متداولة"},
+                {"السنة": "2026", "الشهر": "1", "كود الحساب": "1401", "اسم الحساب": "مخزون بضاعة أول المدة", "المدين": 30000, "الدائن": 0, "تصنيف الحساب (Classification)": "أصول متداولة - مخزون"},
+                {"السنة": "2026", "الشهر": "1", "كود الحساب": "1501", "اسم الحساب": "موردين وذمم دائنة تجارية", "المدين": 0, "الدائن": 30000, "تصنيف الحساب (Classification)": "التزامات متداولة - موردين"},
+                {"السنة": "2026", "الشهر": "1", "كود الحساب": "4001", "اسم الحساب": "إيرادات مبيعات السلع والخدمات", "المدين": 0, "الدائن": 100000, "تصنيف الحساب (Classification)": "إيرادات"},
+                {"السنة": "2026", "الشهر": "1", "كود الحساب": "5001", "اسم الحساب": "تكلفة المبيعات والبضاعة المباعة", "المدين": 60000, "الدائن": 0, "تصنيف الحساب (Classification)": "تكلفة المبيعات"},
+                {"السنة": "2026", "الشهر": "1", "كود الحساب": "6001", "اسم الحساب": "رواتب ومصاريف إدارية وعمومية", "المدين": 15000, "الدائن": 0, "تصنيف الحساب (Classification)": "مصاريف إدارية وعمومية"},
+                {"السنة": "2026", "الشهر": "1", "كود الحساب": "7001", "اسم الحساب": "مصاريف بنكية وتمويلية", "المدين": 5000, "الدائن": 0, "تصنيف الحساب (Classification)": "مصاريف تمويلية"},
                 
                 // ميزان مراجعة الشهر الثاني (فبراير 2026) لتجربة الفلاتر والمقارنات
-                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "1001", "اسم الحساب (Account Name)": "رأس المال المساهم", "المدين (Debit)": 0, "الدائن (Credit)": 500000, "تصنيف الحساب (Classification)": "حقوق ملكية - رأس المال"},
-                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "1101", "اسم الحساب (Account Name)": "نقدية بالصندوق ولدى البنوك", "المدين (Debit)": 426000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "أصول متداولة - نقدية بالبنوك"},
-                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "1201", "اسم الحساب (Account Name)": "أصول ثابتة - آلات ومعدات", "المدين (Debit)": 150000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "أصول غير متداولة - أصول ثابتة"},
-                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "1301", "اسم الحساب (Account Name)": "قروض بنكية طويلة الأجل", "المدين (Debit)": 0, "الدائن (Credit)": 50000, "تصنيف الحساب (Classification)": "التزامات غير متداولة"},
-                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "1401", "اسم الحساب (Account Name)": "مخزون بضاعة أول المدة", "المدين (Debit)": 30000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "أصول متداولة - مخزون"},
-                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "1501", "اسم الحساب (Account Name)": "موردين وذمم دائنة تجارية", "المدين (Debit)": 0, "الدائن (Credit)": 30000, "تصنيف الحساب (Classification)": "التزامات متداولة - موردين"},
-                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "4001", "اسم الحساب (Account Name)": "إيرادات مبيعات السلع والخدمات", "المدين (Debit)": 0, "الدائن (Credit)": 140000, "تصنيف الحساب (Classification)": "إيرادات"},
-                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "5001", "اسم الحساب (Account Name)": "تكلفة المبيعات والبضاعة المباعة", "المدين (Debit)": 80000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "تكلفة المبيعات"},
-                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "6001", "اسم الحساب (Account Name)": "رواتب ومصاريف إدارية وعمومية", "المدين (Debit)": 20000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "مصاريف إدارية وعمومية"},
-                {"السنة (Year)": "2026", "الشهر (Month)": "2", "كود الحساب (Account Code)": "7001", "اسم الحساب (Account Name)": "مصاريف بنكية وتمويلية", "المدين (Debit)": 4000, "الدائن (Credit)": 0, "تصنيف الحساب (Classification)": "مصاريف تمويلية"}
+                {"السنة": "2026", "الشهر": "2", "كود الحساب": "1001", "اسم الحساب": "رأس المال المساهم", "المدين": 0, "الدائن": 500000, "تصنيف الحساب (Classification)": "حقوق ملكية - رأس المال"},
+                {"السنة": "2026", "الشهر": "2", "كود الحساب": "1101", "اسم الحساب": "نقدية بالصندوق ولدى البنوك", "المدين": 426000, "الدائن": 0, "تصنيف الحساب (Classification)": "أصول متداولة - نقدية بالبنوك"},
+                {"السنة": "2026", "الشهر": "2", "كود الحساب": "1201", "اسم الحساب": "أصول ثابتة - آلات ومعدات", "المدين": 150000, "الدائن": 0, "تصنيف الحساب (Classification)": "أصول غير متداولة - أصول ثابتة"},
+                {"السنة": "2026", "الشهر": "2", "كود الحساب": "1301", "اسم الحساب": "قروض بنكية طويلة الأجل", "المدين": 0, "الدائن": 50000, "تصنيف الحساب (Classification)": "التزامات غير متداولة"},
+                {"السنة": "2026", "الشهر": "2", "كود الحساب": "1401", "اسم الحساب": "مخزون بضاعة أول المدة", "المدين": 30000, "الدائن": 0, "تصنيف الحساب (Classification)": "أصول متداولة - مخزون"},
+                {"السنة": "2026", "الشهر": "2", "كود الحساب": "1501", "اسم الحساب": "موردين وذمم دائنة تجارية", "المدين": 0, "الدائن": 30000, "تصنيف الحساب (Classification)": "التزامات متداولة - موردين"},
+                {"السنة": "2026", "الشهر": "2", "كود الحساب": "4001", "اسم الحساب": "إيرادات مبيعات السلع والخدمات", "المدين": 0, "الدائن": 140000, "تصنيف الحساب (Classification)": "إيرادات"},
+                {"السنة": "2026", "الشهر": "2", "كود الحساب": "5001", "اسم الحساب": "تكلفة المبيعات والبضاعة المباعة", "المدين": 80000, "الدائن": 0, "تصنيف الحساب (Classification)": "تكلفة المبيعات"},
+                {"السنة": "2026", "الشهر": "2", "كود الحساب": "6001", "اسم الحساب": "رواتب ومصاريف إدارية وعمومية", "المدين": 20000, "الدائن": 0, "تصنيف الحساب (Classification)": "مصاريف إدارية وعمومية"},
+                {"السنة": "2026", "الشهر": "2", "كود الحساب": "7001", "اسم الحساب": "مصاريف بنكية وتمويلية", "المدين": 4000, "الدائن": 0, "تصنيف الحساب (Classification)": "مصاريف تمويلية"}
             ];
 
             localStorage.setItem('financialData', JSON.stringify(demoData));
@@ -1292,25 +1293,25 @@
             const classKey = keys.find(k => k.includes('تصنيف') || k.toLowerCase().includes('class') || k.includes('IFRS') || k.toLowerCase().includes('category') || k.toLowerCase().includes('type')) || keys[4];
 
             const currentPeriodRows = financialData.filter(row => 
-                row[yearKey] && row[monthKey] &&
+                row[yearKey] !== undefined && row[monthKey] !== undefined &&
                 row[yearKey].toString().trim() === selectedYear.toString().trim() && 
                 row[monthKey].toString().trim() === selectedMonth.toString().trim()
             );
 
             const prevPeriodRows = financialData.filter(row => 
-                row[yearKey] && row[monthKey] &&
+                row[yearKey] !== undefined && row[monthKey] !== undefined &&
                 row[yearKey].toString().trim() === prevYear.toString().trim() && 
                 row[monthKey].toString().trim() === prevMonth.toString().trim()
             );
 
             const currentCumRows = financialData.filter(row => 
-                row[yearKey] && row[monthKey] &&
+                row[yearKey] !== undefined && row[monthKey] !== undefined &&
                 row[yearKey].toString().trim() === selectedYear.toString().trim() && 
                 parseInt(row[monthKey]) <= parseInt(selectedMonth)
             );
 
             const prevCumRows = financialData.filter(row => 
-                row[yearKey] && row[monthKey] &&
+                row[yearKey] !== undefined && row[monthKey] !== undefined &&
                 row[yearKey].toString().trim() === prevYear.toString().trim() && 
                 parseInt(row[monthKey]) <= parseInt(prevMonth)
             );
